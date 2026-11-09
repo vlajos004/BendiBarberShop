@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bendi">
+<meta name="theme-color" content="#f6f1ea" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16130f" media="(prefers-color-scheme: dark)">
+<title>Bendi</title>
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f1ea;--card:#fffdf9;--ink:#1d1a17;--muted:#7a6f64;--line:#e8ded1;--soft:#efe7dc;
+  --brass:#a8702f;--brass-ink:#ffffff;--brass-soft:#f3e6d4;
+  --ok:#2f7d4f;--ok-bg:#e4f1e8;--warn:#9a5810;--warn-bg:#fbeedb;--bad:#b3362c;--bad-bg:#f8e2df;
+  --wa:#0a84ff;--shadow:0 1px 2px rgba(60,40,20,.06),0 4px 14px rgba(60,40,20,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16130f;--card:#201c17;--ink:#f3ece2;--muted:#a89a8a;--line:#332c24;--soft:#2a241e;
+    --brass:#d39a55;--brass-ink:#16130f;--brass-soft:#3a2d1e;
+    --ok:#6fcf97;--ok-bg:#1d3226;--warn:#f0b35c;--warn-bg:#3a2a14;--bad:#f08a7e;--bad-bg:#3d1f1b;
+    --wa:#0a84ff;--shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16130f;--card:#201c17;--ink:#f3ece2;--muted:#a89a8a;--line:#332c24;--soft:#2a241e;
+  --brass:#d39a55;--brass-ink:#16130f;--brass-soft:#3a2d1e;
+  --ok:#6fcf97;--ok-bg:#1d3226;--warn:#f0b35c;--warn-bg:#3a2a14;--bad:#f08a7e;--bad-bg:#3d1f1b;
+  --wa:#0a84ff;--shadow:none;
+}
+.theme{width:44px;height:44px;border-radius:50%;padding:0;font-size:18px;flex:none}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(12px + env(safe-area-inset-top)) 16px 10px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px}
+.hl{display:flex;align-items:center;gap:10px;min-width:0}
+.hl h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hr{display:flex;justify-content:flex-end}
+.bell{position:relative;width:44px;height:44px;border-radius:50%;padding:0;font-size:19px}
+.bell.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.bell b{position:absolute;top:-3px;right:-3px;min-width:20px;height:20px;border-radius:10px;background:var(--bad);color:#fff;font-size:12px;line-height:20px;padding:0 5px}
+.brand{font-family:Fraunces,Georgia,serif;font-size:28px;font-weight:700;letter-spacing:-.5px;margin:0;flex:1}
+.brand small{display:block;font:500 12px/1 -apple-system,sans-serif;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
+.back{width:40px;height:40px;border-radius:50%;padding:0;font-size:20px}
+main{padding:0 16px;max-width:560px;margin:0 auto}
+h2{font-family:Fraunces,Georgia,serif;font-size:20px;margin:18px 0 10px;font-weight:600}
+h3{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px;font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+button,.btn{font:inherit;font-size:15px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:10px 14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px}
+button.primary,.btn.primary{background:var(--brass);color:var(--brass-ink);border-color:var(--brass);font-weight:600}
+button.ghost{background:transparent}
+button.danger{color:var(--bad)}
+button:disabled{opacity:.4}
+.wa{background:var(--wa);color:#fff;border-color:var(--wa);font-weight:600}
+.wa.sent{opacity:.55}
+.ms{background:#0866ff;color:#fff;border-color:#0866ff;font-weight:600}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.row.full > *{flex:1}
+.muted{color:var(--muted);font-size:14px}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px;font-weight:500}
+input,textarea,select{width:100%;font:inherit;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);min-height:46px}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--brass);outline-offset:-1px;border-color:transparent}
+textarea{min-height:130px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.warnbox{background:var(--warn-bg);color:var(--warn);border-radius:12px;padding:11px 13px;font-size:14px;margin:4px 0 12px}
+.empty{text-align:center;color:var(--muted);padding:26px 10px}
+
+/* calendar */
+.monthbar{display:flex;align-items:center;gap:8px;margin:2px 0 10px}
+.monthbar .t{flex:1;text-align:center;font-family:Fraunces,Georgia,serif;font-size:19px;font-weight:600;text-transform:capitalize}
+.monthbar button{width:44px;padding:0}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:10px;box-shadow:var(--shadow)}
+.cal .wd{text-align:center;font-size:11px;color:var(--muted);font-weight:600;padding:2px 0 6px}
+.cal .d{aspect-ratio:1;border:0;border-radius:12px;background:none;min-height:0;padding:0;flex-direction:column;gap:3px;font-size:15px}
+.cal .d.today{color:var(--brass);font-weight:700}
+.cal .d.sel{background:var(--ink);color:var(--bg)}
+.cal .d.past{color:var(--muted)}
+.dots{display:flex;gap:2px;height:5px}
+.dots i{width:5px;height:5px;border-radius:50%;background:var(--brass)}
+.cal .d.sel .dots i{background:var(--bg)}
+.chips{display:flex;gap:8px;margin:12px 0 0}
+.chip{min-height:36px;padding:6px 14px;border-radius:999px;font-size:14px}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* appointments */
+.appt{display:flex;gap:12px;align-items:stretch;cursor:pointer}
+.appt .tm{min-width:58px;border-right:2px solid var(--brass);padding-right:10px}
+.appt .tm b{display:block;font-size:18px}
+.appt .tm span{font-size:12px;color:var(--muted)}
+.appt .info{flex:1;min-width:0}
+.appt .nm{font-weight:600;font-size:16px}
+.appt.cx{opacity:.55}
+.appt.cx .tm{border-color:var(--line)}
+.badge{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;display:inline-block;white-space:nowrap}
+.b-ok{background:var(--ok-bg);color:var(--ok)}
+.b-warn{background:var(--warn-bg);color:var(--warn)}
+.b-bad{background:var(--bad-bg);color:var(--bad)}
+.b-n{background:var(--soft);color:var(--muted)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button.on-ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
+.seg button.on-warn{background:var(--warn-bg);color:var(--warn);border-color:var(--warn)}
+.seg button.on-bad{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+
+/* guests */
+.search{position:relative}
+.search input{padding-left:40px}
+.search::before{content:"⌕";position:absolute;left:14px;top:50%;transform:translateY(-52%);font-size:20px;color:var(--muted)}
+.g{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.g:last-child{border-bottom:0}
+.av{width:42px;height:42px;border-radius:50%;background:var(--brass-soft);color:var(--brass);display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+.g .nm{font-weight:600}
+.g .flags{margin-left:auto;display:flex;gap:4px}
+.picked{display:flex;align-items:center;gap:12px;background:var(--brass-soft);border-radius:14px;padding:10px 12px}
+.picked .nm{font-weight:600;flex:1}
+.res{margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 10px}
+.res:empty{display:none}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+.tile b{display:block;font-family:Fraunces,Georgia,serif;font-size:26px}
+.tile span{font-size:12px;color:var(--muted)}
+.stat{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.stat:last-child{border-bottom:0}
+
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;align-items:flex-end;padding:6px 6px env(safe-area-inset-bottom);z-index:6}
+nav button{flex:1;border:0;background:none;padding:6px 2px 8px;font-size:11px;flex-direction:column;gap:2px;color:var(--muted);min-height:0}
+nav button .ic{font-size:21px;line-height:1}
+nav button.on{color:var(--ink);font-weight:600}
+nav .plus .ic{width:52px;height:52px;border-radius:50%;background:var(--brass);color:var(--brass-ink);display:flex;align-items:center;justify-content:center;font-size:28px;margin-top:-22px;box-shadow:0 4px 14px rgba(168,112,47,.35)}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%;z-index:9}
+.toast.show{opacity:1}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:560px;border-radius:22px 22px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px}
+.sheet .btn,.sheet button{width:100%;min-height:52px;font-size:16px}
+</style>
+</head>
+<body>
+<header id="hdr"></header>
+<main id="view"></main>
+<nav id="nav">
+  <button data-go="cal"><span class="ic">◷</span>Naptár</button>
+  <button data-go="guests"><span class="ic">☺</span>Vendégek</button>
+  <button data-go="book" class="plus" aria-label="Új foglalás"><span class="ic">+</span>Foglalás</button>
+  <button data-go="stats"><span class="ic">▤</span>Mérés</button>
+  <button data-go="settings"><span class="ic">⚙︎</span>Beállítás</button>
+</nav>
+<div class="toast" id="toast" role="status"></div>
+<div id="sheet"></div>
+
+<script>
+const KEY = 'bendi_v2', OLD_KEY = 'szalon_naplo_v1';
+const OLD_TPL = 'Szia {nev}! Emlékeztetlek: {nap} {ido}-kor vár a szék Bendinél.\n\n✅ Megerősítem: {megerosit}\n❌ Lemondom: {lemond}\n\nKöszi!';
+const PREV_TPL = 'Szia {nev}! Emlékeztetlek: {nap} {ido}-kor vár a szék Bendinél.\n\nKérlek, válaszolj egy számmal:\n1 – jövök\n2 – lemondom\n\nKöszi!';
+const DEF_TPL = 'Szia {nev}, {nap} {ido}-kor várlak. Ha közbejön valami, szólj rám!';
+const ST = { confirmed:['Megerősítve','ok'], cancelled:['Lemondva','warn'], came:['Eljött','ok'], noshow:['Nem jött','bad'] };
+// resp: a vendég válasza (confirmed/cancelled), status: mi lett (came/noshow). A régi mentésekben egy mezőben voltak.
+function fixAppts(st){ for (const a of st.appts) if (a.status === 'confirmed' || a.status === 'cancelled') { a.resp = a.status; a.status = null; } return st; }
+const cx = a => a.resp === 'cancelled';
+const blank = () => ({ guests:[], appts:[], template:DEF_TPL, lastBackup:null });
+let S = blank(), storageOk = true;
+let view = 'cal', param = null, back = null;
+let calMonth, selDay, bk = null, guestPrefill = '';
+
+/* ---------- storage ---------- */
+function load(){
+  try {
+    const s = localStorage.getItem(KEY);
+    if (s) { S = fixAppts(Object.assign(blank(), JSON.parse(s))); save(); if (S.template === OLD_TPL || S.template === PREV_TPL) { S.template = DEF_TPL; save(); } return; }
+    const old = localStorage.getItem(OLD_KEY);
+    if (old) { S = fixAppts(migrate(JSON.parse(old))); save(); }
+  } catch(e){ storageOk = false; }
+}
+// Az első verzió (Szalon Napló) időpontjaiból vendégeket és foglalásokat készít, hogy semmi ne vesszen el.
+function migrate(o){
+  const n = blank(); n.lastBackup = o.lastBackup || null;
+  for (const a of (o.appts || [])){
+    let g = n.guests.find(x => normPhone(x.phone) === normPhone(a.phone));
+    if (!g){ g = { id:uid(), name:a.name, phone:a.phone, note:'', created:Date.now() }; n.guests.push(g); }
+    n.appts.push({ id:a.id || uid(), guestId:g.id, date:a.date, time:a.time, dur:60, service:a.note || '', status:a.status || null, reminded:!!a.reminded });
+  }
+  return n;
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){ storageOk = false; toast('Nem sikerült menteni a telefonra!'); } }
+
+/* ---------- helpers ---------- */
+const pad = n => String(n).padStart(2,'0');
+const toStr = d => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const today = () => toStr(new Date());
+const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const addDays = (s,n) => { const d = parse(s); d.setDate(d.getDate()+n); return toStr(d); };
+const fmtDate = s => parse(s).toLocaleDateString('hu-HU',{month:'long',day:'numeric',weekday:'long'});
+const fmtShort = s => parse(s).toLocaleDateString('hu-HU',{year:'numeric',month:'short',day:'numeric'});
+const dayLabel = s => s===today() ? 'ma' : s===addDays(today(),1) ? 'holnap' : fmtDate(s);
+const mins = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+const endTime = a => { const m = mins(a.time) + (+a.dur||60); return pad(Math.floor(m/60)%24)+':'+pad(m%60); };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const guest = id => S.guests.find(g => g.id === id) || { name:'(törölt vendég)', phone:'' };
+const initials = n => n.trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
+const firstName = n => n.trim().split(/\s+/).pop(); // magyar névsorrend: a keresztnév a végén
+const byTime = (a,b) => (a.date+a.time).localeCompare(b.date+b.time);
+const fold = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+function toast(m){ const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), m.length > 40 ? 3500 : 2200); }
+
+// Magyar szám -> nemzetközi formátum (06 30 123 4567 -> 36301234567)
+function normPhone(p){
+  let d = String(p||'').replace(/\D/g,'');
+  if (d.startsWith('0036')) d = d.slice(2);
+  else if (d.startsWith('06')) d = '36' + d.slice(2);
+  else if (d.length === 9 && /^(20|30|31|50|70)/.test(d)) d = '36' + d;
+  return d;
+}
+function guestStats(gid){
+  const l = S.appts.filter(a => a.guestId === gid);
+  const c = s => l.filter(a => a.status === s).length;
+  return { total:l.length, came:c('came'), cancelled:l.filter(cx).length, noshow:c('noshow') };
+}
+function message(a){
+  const g = guest(a.guestId);
+  return S.template.replaceAll('{nev}', firstName(g.name)).replaceAll('{ido}', a.time).replaceAll('{nap}', dayLabel(a.date))
+    .split('\n').filter(l => !/\{megerosit\}|\{lemond\}/.test(l)).join('\n').replace(/\n{3,}/g,'\n\n').trim(); // régi link-helyettesítők kimaradnak
+}
+// iPhone-on az sms: link iMessage-t küld, ha a vendégnek is iPhone-ja van, különben SMS-t. iOS "&body=", Android "?body=".
+const isIOS = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
+const msgLink = a => 'sms:+' + normPhone(guest(a.guestId).phone) + (isIOS ? '&' : '?') + 'body=' + encodeURIComponent(message(a));
+function chooseSend(id){
+  const a = S.appts.find(x => x.id === id), g = guest(a.guestId);
+  document.getElementById('sheet').innerHTML = `<div class="sheet-bg" onclick="if(event.target===this)closeSheet()"><div class="sheet" role="dialog" aria-label="Hogyan küldjem?">
+    <div style="font-weight:600;text-align:center">Emlékeztető ${esc(firstName(g.name))} részére</div>
+    ${g.phone ? `<a class="btn wa" href="${esc(msgLink(a))}" onclick="markReminded('${a.id}');closeSheet()">iMessage / SMS</a>` : '<div class="muted" style="text-align:center">Nincs megadva telefonszám, ezért SMS nem küldhető.</div>'}
+    <button class="ms" onclick="sendMessenger('${a.id}')">Messenger / egyéb (megosztás)</button>
+    <div class="muted" style="text-align:center">A megosztásnál válaszd a Messengert, majd a vendéget.</div>
+    <button onclick="closeSheet()">Mégse</button></div></div>`;
+}
+function closeSheet(){ document.getElementById('sheet').innerHTML = ''; }
+function sendMessenger(id){
+  closeSheet();
+  const a = S.appts.find(x => x.id === id), txt = message(a);
+  // Az iPhone megosztás menüjében a Messenger saját küldőablaka nyílik meg, kész szöveggel; Bendi csak a vendéget választja ki.
+  if (navigator.share) { navigator.share({ text: txt }).then(() => markReminded(id), e => { if (e.name !== 'AbortError') copyText(id, txt); }); return; }
+  copyText(id, txt);
+}
+function copyText(id, txt){
+  const ok = () => { markReminded(id); toast('Kimásolva! Nyisd meg a Messengert, és illeszd be.'); };
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).then(ok, () => { prompt('Másold ki az üzenetet:', txt); markReminded(id); });
+  else { prompt('Másold ki az üzenetet:', txt); markReminded(id); }
+}
+const apptBadge = a => badge(a.status) || badge(a.resp);
+const badge = s => s && ST[s] ? `<span class="badge b-${ST[s][1]}">${ST[s][0]}</span>` : '';
+
+/* ---------- routing ---------- */
+function go(v, p=null, from=null){ view = v; param = p; back = from; render(); window.scrollTo(0,0); }
+function render(){
+  const titles = { cal:'Naptár', guests:'Vendégek', book:bk && bk.editId ? 'Módosítás' : 'Új foglalás', stats:'Mérés', settings:'Beállítás', appt:'Időpont', guest:'Vendég', guestForm:param ? 'Szerkesztés' : 'Új vendég', notif:'Teendők' };
+  const top = ['cal','guests','stats','settings'].includes(view) && !back;
+  const n = pending().length;
+  const bell = `<button class="bell ${view==='notif'?'on':''}" onclick="${view==='notif' ? 'goBack()' : `go('notif',null,{v:view,p:param})`}" aria-label="Teendők: ${n} lejárt időpont">🔔︎${n ? `<b>${n}</b>` : ''}</button>`;
+  document.getElementById('hdr').innerHTML = `<div class="hl">${top
+    ? `<h1 class="brand">Bendi<small>${esc(titles[view])}</small></h1>`
+    : `<button class="back" onclick="goBack()" aria-label="Vissza">‹</button><h1 class="brand" style="font-size:20px">${esc(titles[view])}</h1>`}</div>${bell}<div class="hr">${themeBtn()}</div>`;
+  document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.go === view));
+  document.getElementById('view').innerHTML = ({cal:vCal, guests:vGuests, book:vBook, stats:vStats, settings:vSettings, appt:vAppt, guest:vGuest, guestForm:vGuestForm, notif:vNotif})[view]();
+}
+const isDark = () => (document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark';
+const themeBtn = () => `<button class="theme" onclick="toggleTheme()" aria-label="${isDark() ? 'Világos' : 'Sötét'} megjelenés">${isDark() ? '☀︎' : '☾'}</button>`;
+function applyTheme(t){
+  if (t) document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
+  if (t) document.querySelectorAll('meta[name=theme-color]').forEach(m => m.content = t === 'dark' ? '#16130f' : '#f6f1ea');
+}
+function toggleTheme(){ const t = isDark() ? 'light' : 'dark'; applyTheme(t); try { localStorage.setItem('bendi_theme', t); } catch(e){} render(); }
+function goBack(){ if (back) { const b = back; go(b.v, b.p, b.from || null); } else go('cal'); }
+
+/* ---------- calendar ---------- */
+function warnings(){
+  if (!storageOk) return '<div class="warnbox">A böngésző nem engedi az adatok mentését. Ne privát/inkognitó módban használd!</div>';
+  let h = '';
+  if (S.appts.length && (!S.lastBackup || (Date.now()-S.lastBackup)/864e5 > 2)) h += `<div class="warnbox" style="cursor:pointer" onclick="go('settings')">${S.lastBackup ? 'Több mint 2 napja nem volt' : 'Még nem volt'} biztonsági mentés. Koppints ide a mentéshez.</div>`;
+  return h;
+}
+function vCal(){
+  const t = today(), d0 = parse(calMonth), y = d0.getFullYear(), m = d0.getMonth();
+  const offset = (d0.getDay()+6)%7, n = new Date(y, m+1, 0).getDate();
+  let cells = ['H','K','Sze','Cs','P','Szo','V'].map(w => `<div class="wd">${w}</div>`).join('');
+  for (let i=0;i<offset;i++) cells += '<div></div>';
+  for (let d=1; d<=n; d++){
+    const ds = toStr(new Date(y,m,d)), k = S.appts.filter(a => a.date===ds && !cx(a)).length;
+    cells += `<button class="d ${ds===t?'today':''} ${ds===selDay?'sel':''} ${ds<t?'past':''}" onclick="pickDay('${ds}')" aria-label="${esc(fmtDate(ds))}, ${k} időpont">${d}<span class="dots">${'<i></i>'.repeat(Math.min(k,4))}</span></button>`;
+  }
+  const list = S.appts.filter(a => a.date === selDay).sort(byTime);
+  let h = warnings() + `<div class="monthbar"><button onclick="shiftMonth(-1)" aria-label="Előző hónap">‹</button><div class="t">${esc(d0.toLocaleDateString('hu-HU',{year:'numeric',month:'long'}))}</div><button onclick="shiftMonth(1)" aria-label="Következő hónap">›</button></div>
+    <div class="cal">${cells}</div>
+    <div class="chips"><button class="chip ${selDay===t?'on':''}" onclick="pickDay('${t}')">Ma</button><button class="chip ${selDay===addDays(t,1)?'on':''}" onclick="pickDay('${addDays(t,1)}')">Holnap</button></div>
+    <h2>${esc(fmtDate(selDay))}</h2>`;
+  if (!list.length) return h + `<div class="empty">Erre a napra nincs foglalás.<div class="row" style="justify-content:center"><button class="primary" onclick="newBooking('${selDay}')">+ Foglalás erre a napra</button></div></div>`;
+  for (const a of list){
+    const g = guest(a.guestId), canRemind = a.date >= t && !cx(a) && a.status !== 'came';
+    h += `<div class="card appt ${cx(a)?'cx':''}" onclick="go('appt','${a.id}',{v:'cal'})">
+      <div class="tm"><b>${esc(a.time)}</b><span>${esc(endTime(a))}-ig</span></div>
+      <div class="info"><div class="nm">${esc(g.name)}</div><div class="muted">${esc(a.service || 'Időpont')}</div>
+        <div class="row" style="margin-top:8px;align-items:center">${apptBadge(a) || (a.reminded ? '<span class="badge b-n">Emlékeztetve</span>' : '')}
+        ${canRemind ? `<button class="wa ${a.reminded?'sent':''}" style="margin-left:auto;min-height:38px;padding:6px 12px" onclick="event.stopPropagation();chooseSend('${a.id}')">${a.reminded?'Újra':'Üzenet'}</button>` : ''}</div>
+      </div></div>`;
+  }
+  return h + `<div class="row" style="justify-content:center"><button onclick="newBooking('${selDay}')">+ Újabb foglalás erre a napra</button></div>`;
+}
+function pickDay(ds){ selDay = ds; calMonth = ds.slice(0,8)+'01'; render(); }
+function shiftMonth(k){ const d = parse(calMonth); d.setMonth(d.getMonth()+k); calMonth = toStr(d); render(); }
+
+/* ---------- appointment detail ---------- */
+function vAppt(){
+  const a = S.appts.find(x => x.id === param); if (!a) return '<div class="empty">Ez az időpont már nem létezik.</div>';
+  const g = guest(a.guestId), b = (f, k, cls, label, dis) => `<button class="${a[f]===k?'on-'+cls:''}" ${dis?'disabled':''} onclick="setMark('${a.id}','${f}','${k}')">${label}</button>`;
+  const canRemind = a.date >= today() && !cx(a) && a.status !== 'came';
+  return `<div class="card">
+      <div class="g" style="border:0;padding:0" onclick="go('guest','${a.guestId}',{v:'appt',p:'${a.id}'})"><div class="av">${esc(initials(g.name))}</div><div><div class="nm">${esc(g.name)}</div><div class="muted">${esc(g.phone)}</div></div><span class="muted" style="margin-left:auto">›</span></div>
+      <h3>Időpont</h3><div style="font-size:18px;font-weight:600">${esc(fmtDate(a.date))}</div><div>${esc(a.time)}–${esc(endTime(a))} · ${esc(a.service || 'Időpont')}</div>
+      ${canRemind ? `<div class="row full"><button class="wa ${a.reminded?'sent':''}" onclick="chooseSend('${a.id}')">${a.reminded?'Emlékeztető újraküldése':'Emlékeztető küldése'}</button></div>` : ''}
+    </div>
+    <h3>Mit válaszolt?</h3>
+    <div class="seg">${b('resp','confirmed','ok','Megerősítette')}${b('resp','cancelled','warn','Lemondta')}</div>
+    <h3>Eljött?</h3>
+    <div class="seg">${b('status','came','ok','Eljött',cx(a))}${b('status','noshow','bad','Nem jött el',cx(a))}</div>
+    <p class="muted">${cx(a) ? 'Lemondta, ezért nem jött el. Ez lemondásként számít, nem meg nem jelenésként.' : 'Még egy koppintás visszavonja a jelölést. A lejárt időpontokat a fenti csengőnél is bejelölheted.'}</p>
+    <div class="row full"><button onclick="editBooking('${a.id}')">Módosítás</button><button class="danger" onclick="delAppt('${a.id}')">Törlés</button></div>`;
+}
+function setMark(id, f, k){
+  const a = S.appts.find(x => x.id === id); a[f] = a[f] === k ? null : k;
+  if (cx(a)) a.status = null; // lemondott időpontnál nincs eljött/nem jött jelölés
+  save(); render(); toast(a[f] ? ST[k][0] : 'Jelölés törölve');
+}
+// Lejárt (vége elmúlt), nem lemondott, még nem jelölt időpontok – a csengő ezekre kérdez rá.
+const endAt = a => { const d = parse(a.date); d.setMinutes(mins(a.time) + (+a.dur||60)); return d; };
+const pending = () => S.appts.filter(a => !a.status && !cx(a) && endAt(a) < new Date()).sort(byTime);
+function vNotif(){
+  const l = pending();
+  if (!l.length) return '<div class="empty">Nincs teendő. Minden lejárt időpont be van jelölve.</div>';
+  return '<p class="muted" style="margin-top:0">Ezek az időpontok lejártak. Jelöld be, hogy a vendég eljött-e.</p>' + l.map(a => { const g = guest(a.guestId); return `<div class="card">
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><div class="nm" style="font-weight:600">${esc(g.name)}</div><div class="muted">${esc(fmtShort(a.date))} ${esc(a.time)} · ${esc(a.service || 'Időpont')}</div></div>${apptBadge(a)}</div>
+    <div class="seg" style="margin-top:12px"><button class="on-ok" onclick="quickMark('${a.id}','came')">Eljött</button><button class="on-bad" onclick="quickMark('${a.id}','noshow')">Nem jött el</button></div></div>`; }).join('');
+}
+function quickMark(id, k){ S.appts.find(x => x.id === id).status = k; save(); render(); toast(ST[k][0]); }
+function markReminded(id){ const a = S.appts.find(x => x.id === id); if (a){ a.reminded = true; save(); setTimeout(render, 400); } }
+function delAppt(id){ if (!confirm('Biztosan törlöd ezt az időpontot? Ha a vendég lemondta, inkább jelöld „Lemondta”-nak, hogy beleszámítson a statisztikába.')) return; const a = S.appts.find(x => x.id === id); S.appts = S.appts.filter(x => x.id !== id); save(); selDay = a.date; go('cal'); toast('Törölve'); }
+
+/* ---------- booking ---------- */
+function newBooking(date, guestId=null){ bk = { guestId, date: date || selDay || today(), time:'10:00', dur:60, service:'', editId:null }; go('book', null, view==='book' ? null : {v:view, p:param, from:back}); }
+function editBooking(id){ const a = S.appts.find(x => x.id === id); bk = { guestId:a.guestId, date:a.date, time:a.time, dur:a.dur, service:a.service, editId:id }; go('book', null, {v:'appt', p:id}); }
+function vBook(){
+  if (!bk) bk = { guestId:null, date:selDay || today(), time:'10:00', dur:60, service:'', editId:null };
+  const durs = [15,30,45,60,90,120,180];
+  return `<label>Vendég</label><div id="picker">${pickerHtml()}</div>
+    <div class="two"><div><label for="b-date">Nap</label><input id="b-date" type="date" value="${esc(bk.date)}" onchange="bk.date=this.value"></div>
+    <div><label for="b-time">Kezdés</label><input id="b-time" type="time" step="300" value="${esc(bk.time)}" onchange="bk.time=this.value"></div></div>
+    <label for="b-dur">Időtartam</label><select id="b-dur" onchange="bk.dur=+this.value">${durs.map(d => `<option value="${d}" ${+bk.dur===d?'selected':''}>${d < 60 ? d+' perc' : (d/60)+' óra'}</option>`).join('')}</select>
+    <label for="b-svc">Szolgáltatás (nem kötelező)</label><input id="b-svc" value="${esc(bk.service)}" placeholder="pl. hajvágás, szakáll, festés" oninput="bk.service=this.value">
+    <div class="row full" style="margin-top:20px"><button class="primary" onclick="saveBooking()">${bk.editId ? 'Módosítás mentése' : 'Foglalás mentése'}</button></div>`;
+}
+function pickerHtml(){
+  if (bk.guestId){ const g = guest(bk.guestId); return `<div class="picked"><div class="av">${esc(initials(g.name))}</div><div class="nm">${esc(g.name)}<div class="muted" style="font-weight:400">${esc(g.phone)}</div></div><button class="ghost" onclick="bk.guestId=null;document.getElementById('picker').innerHTML=pickerHtml();document.getElementById('gq').focus()">Csere</button></div>`; }
+  return `<div class="search"><input id="gq" placeholder="Vendég keresése név vagy szám alapján…" autocomplete="off" oninput="pickSearch(this.value)" aria-label="Vendég keresése"></div><div class="res" id="gres"></div>`;
+}
+function matchGuests(q){
+  const f = fold(q.trim()), digits = q.replace(/\D/g,'');
+  return S.guests.filter(g => !f || fold(g.name).includes(f) || (digits.length >= 3 && (g.phone.replace(/\D/g,'').includes(digits) || normPhone(g.phone).includes(normPhone(digits)))))
+    .sort((a,b) => a.name.localeCompare(b.name,'hu'));
+}
+function pickSearch(q){
+  const el = document.getElementById('gres'); if (!q.trim()){ el.innerHTML = ''; return; }
+  const r = matchGuests(q).slice(0,8);
+  el.innerHTML = r.map(g => `<div class="g" onclick="pickGuest('${g.id}')"><div class="av">${esc(initials(g.name))}</div><div><div class="nm">${esc(g.name)}</div><div class="muted">${esc(g.phone)}</div></div>${flags(g.id)}</div>`).join('')
+    + `<div class="g" onclick="newGuestFromBooking()"><div class="av">+</div><div class="nm">Új vendég: „${esc(q.trim())}”</div></div>`;
+}
+function pickGuest(id){ bk.guestId = id; document.getElementById('picker').innerHTML = pickerHtml(); }
+function newGuestFromBooking(){ guestPrefill = document.getElementById('gq').value.trim(); go('guestForm', null, {v:'book'}); }
+function saveBooking(){
+  if (!bk.guestId) { toast('Válassz vendéget!'); return; }
+  bk.date = document.getElementById('b-date').value; bk.time = document.getElementById('b-time').value;
+  if (!bk.date || !bk.time) { toast('Add meg a napot és az időt!'); return; }
+  const s = mins(bk.time), e = s + bk.dur;
+  const clash = S.appts.find(a => a.id !== bk.editId && a.date === bk.date && !cx(a) && mins(a.time) < e && s < mins(a.time) + (+a.dur||60));
+  if (clash && !confirm('Ütközik ezzel: ' + guest(clash.guestId).name + ' ' + clash.time + '–' + endTime(clash) + '. Mégis mented?')) return;
+  if (bk.editId){
+    const a = S.appts.find(x => x.id === bk.editId);
+    if (a.date !== bk.date || a.time !== bk.time) { a.reminded = false; if (a.resp === 'confirmed') a.resp = null; }
+    Object.assign(a, { guestId:bk.guestId, date:bk.date, time:bk.time, dur:bk.dur, service:bk.service.trim() });
+  } else {
+    S.appts.push({ id:uid(), guestId:bk.guestId, date:bk.date, time:bk.time, dur:bk.dur, service:bk.service.trim(), resp:null, status:null, reminded:false });
+  }
+  save(); selDay = bk.date; calMonth = bk.date.slice(0,8)+'01'; bk = null; go('cal'); toast('Foglalás elmentve');
+}
+
+/* ---------- guests ---------- */
+function flags(gid){
+  const s = guestStats(gid);
+  return `<div class="flags">${s.cancelled ? `<span class="badge b-warn" title="Lemondások">${s.cancelled}× lemondta</span>` : ''}${s.noshow ? `<span class="badge b-bad" title="Nem jött el">${s.noshow}× nem jött</span>` : ''}</div>`;
+}
+function vGuests(){
+  return `<div class="row full" style="margin-top:0"><button class="primary" onclick="guestPrefill='';go('guestForm',null,{v:'guests'})">+ Új vendég</button></div>
+    <div class="search" style="margin-top:12px"><input placeholder="Keresés…" autocomplete="off" oninput="document.getElementById('glist').innerHTML=guestRows(this.value)" aria-label="Vendég keresése"></div>
+    <div class="card" style="margin-top:12px;padding:2px 12px" id="glist">${guestRows('')}</div>`;
+}
+function guestRows(q){
+  const r = matchGuests(q);
+  if (!S.guests.length) return '<div class="empty">Még nincs vendég. Vedd fel az elsőt a fenti gombbal.</div>';
+  if (!r.length) return '<div class="empty">Nincs találat.</div>';
+  return r.map(g => { const s = guestStats(g.id); return `<div class="g" onclick="go('guest','${g.id}',{v:'guests'})"><div class="av">${esc(initials(g.name))}</div><div style="min-width:0"><div class="nm">${esc(g.name)}</div><div class="muted">${s.came} alkalom</div></div>${flags(g.id)}</div>`; }).join('');
+}
+function vGuest(){
+  const g = S.guests.find(x => x.id === param); if (!g) return '<div class="empty">Ez a vendég már nem létezik.</div>';
+  const s = guestStats(g.id), t = today();
+  const list = S.appts.filter(a => a.guestId === g.id).sort(byTime).reverse();
+  const up = list.filter(a => a.date >= t && !cx(a)).reverse();
+  const past = list.filter(a => !(a.date >= t && !cx(a)));
+  const row = a => `<div class="stat" style="cursor:pointer" onclick="go('appt','${a.id}',{v:'guest',p:'${g.id}'})"><span>${esc(fmtShort(a.date))} ${esc(a.time)}<span class="muted"> · ${esc(a.service || 'Időpont')}</span></span>${apptBadge(a)}</div>`;
+  return `<div class="card" style="display:flex;gap:14px;align-items:center"><div class="av" style="width:56px;height:56px;font-size:20px">${esc(initials(g.name))}</div>
+      <div style="flex:1;min-width:0"><div style="font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:600">${esc(g.name)}</div>${g.phone ? `<a class="muted" href="tel:${esc(g.phone)}">${esc(g.phone)}</a>` : '<div class="muted">Nincs telefonszám</div>'}${g.note ? `<div class="muted">${esc(g.note)}</div>` : ''}</div></div>
+    <div class="tiles"><div class="tile"><b>${s.came}</b><span>alkalom</span></div><div class="tile"><b style="color:var(--warn)">${s.cancelled}</b><span>lemondás</span></div><div class="tile"><b style="color:var(--bad)">${s.noshow}</b><span>nem jött el</span></div></div>
+    <div class="row full"><button class="primary" onclick="newBooking(null,'${g.id}')">Időpont foglalása</button><button onclick="go('guestForm','${g.id}',{v:'guest',p:'${g.id}'})">Szerkesztés</button></div>
+    ${up.length ? `<h3>Közelgő</h3><div class="card" style="padding:2px 14px">${up.map(row).join('')}</div>` : ''}
+    <h3>Korábbi</h3>${past.length ? `<div class="card" style="padding:2px 14px">${past.map(row).join('')}</div>` : '<div class="muted">Még nincs korábbi időpont.</div>'}`;
+}
+function vGuestForm(){
+  const g = param ? S.guests.find(x => x.id === param) : null;
+  return `<label for="g-name">Név</label><input id="g-name" value="${esc(g ? g.name : guestPrefill)}" placeholder="Vezetéknév Keresztnév" autocomplete="off">
+    <label for="g-phone">Telefonszám (nem kötelező)</label><input id="g-phone" type="tel" inputmode="tel" value="${esc(g?.phone)}" placeholder="06 30 123 4567">
+    <label for="g-note">Megjegyzés (nem kötelező)</label><input id="g-note" value="${esc(g?.note)}" placeholder="pl. mindig rövid oldalt, allergiás valamire">
+    <div class="row full" style="margin-top:20px"><button class="primary" onclick="saveGuest()">Mentés</button></div>
+    ${g ? `<div class="row full"><button class="danger" onclick="delGuest('${g.id}')">Vendég törlése</button></div>` : ''}`;
+}
+function saveGuest(){
+  const name = document.getElementById('g-name').value.trim(), phone = document.getElementById('g-phone').value.trim(), note = document.getElementById('g-note').value.trim();
+  if (!name) { toast('Add meg a nevet!'); return; }
+  if (phone && normPhone(phone).length < 10) { toast('Ellenőrizd a telefonszámot, vagy hagyd üresen!'); return; }
+  const dup = phone && S.guests.find(x => x.id !== param && normPhone(x.phone) === normPhone(phone));
+  if (dup && !confirm('Ezzel a számmal már szerepel: ' + dup.name + '. Mégis új vendégként mented?')) return;
+  if (param) Object.assign(S.guests.find(x => x.id === param), { name, phone, note });
+  else {
+    const g = { id:uid(), name, phone, note, created:Date.now() }; S.guests.push(g);
+    if (back && back.v === 'book' && bk) { bk.guestId = g.id; save(); go('book', null, null); toast('Vendég felvéve'); return; }
+    save(); go('guest', g.id, {v:'guests'}); toast('Vendég felvéve'); return;
+  }
+  save(); goBack(); toast('Elmentve');
+}
+function delGuest(id){
+  const n = S.appts.filter(a => a.guestId === id).length;
+  if (!confirm('Biztosan törlöd a vendéget' + (n ? ' és a(z) ' + n + ' időpontját' : '') + '? Ez nem vonható vissza.')) return;
+  S.guests = S.guests.filter(g => g.id !== id); S.appts = S.appts.filter(a => a.guestId !== id); save(); go('guests'); toast('Vendég törölve');
+}
+
+/* ---------- stats ---------- */
+function vStats(){
+  const done = S.appts.filter(a => ['came','noshow'].includes(a.status));
+  const rate = l => l.length ? Math.round(l.filter(a => a.status==='noshow').length / l.length * 100) + '%' : '–';
+  const cnt = l => l.length ? `<span class="muted">${l.filter(a => a.status==='noshow').length}/${l.length}</span>` : '';
+  const withR = done.filter(a => a.reminded), noR = done.filter(a => !a.reminded);
+  const open = pending().length;
+  const top = S.guests.map(g => ({ g, s:guestStats(g.id) })).filter(x => x.s.cancelled + x.s.noshow).sort((a,b) => (b.s.cancelled+b.s.noshow*2) - (a.s.cancelled+a.s.noshow*2)).slice(0,5);
+  return `<div class="tiles"><div class="tile"><b>${S.appts.filter(a => a.status==='came').length}</b><span>megjelent</span></div><div class="tile"><b style="color:var(--warn)">${S.appts.filter(cx).length}</b><span>lemondás</span></div><div class="tile"><b style="color:var(--bad)">${S.appts.filter(a => a.status==='noshow').length}</b><span>nem jött el</span></div></div>
+    <h3>Elmaradási arány</h3><div class="card" style="padding:4px 14px">
+      <div class="stat"><span>Emlékeztető nélkül</span><span><b>${rate(noR)}</b> ${cnt(noR)}</span></div>
+      <div class="stat"><span>Emlékeztetővel</span><span><b>${rate(withR)}</b> ${cnt(withR)}</span></div></div>
+    ${open ? `<div class="warnbox">${open} lejárt időpontnál még nincs bejelölve, hogy eljött-e. A fenti csengőnél pótolhatod.</div>` : ''}
+    <h3>Legtöbbet lemondók</h3>${top.length ? `<div class="card" style="padding:2px 12px">${top.map(x => `<div class="g" onclick="go('guest','${x.g.id}',{v:'stats'})"><div class="av">${esc(initials(x.g.name))}</div><div class="nm">${esc(x.g.name)}</div>${flags(x.g.id)}</div>`).join('')}</div>` : '<div class="muted">Még nincs lemondás.</div>'}
+    <p class="muted">Tipp: az első 2 hétben ne küldj emlékeztetőt, csak jelöld, ki jött el. Utána 2 hétig küldj mindenkinek. A két arány különbsége mutatja, mennyit ér az emlékeztető.</p>`;
+}
+
+/* ---------- settings ---------- */
+function vSettings(){
+  const lb = S.lastBackup ? new Date(S.lastBackup).toLocaleString('hu-HU') : 'még nem volt';
+  return `<h3>Emlékeztető szövege</h3><div class="card">
+      <p class="muted" style="margin-top:0">Helyettesítők: {nev} keresztnév, {nap} „holnap” vagy dátum, {ido} időpont.</p>
+      <textarea id="tpl">${esc(S.template)}</textarea>
+      <div class="row"><button class="primary" onclick="saveTpl()">Szöveg mentése</button><button onclick="S.template=DEF_TPL;save();render();toast('Visszaállítva')">Alaphelyzet</button></div></div>
+    <h3>Biztonsági mentés</h3><div class="card">
+      <p class="muted" style="margin-top:0">Az adatok csak ezen a telefonon vannak. Ha törlöd a böngészőadatokat vagy telefont cserélsz, elvesznek. 2 naponta ments egyet. A fájl a Fájlok app Letöltések mappájába kerül; ha az új mentés megvan, a régebbieket nyugodtan törölheted.</p>
+      <p class="muted">Utolsó mentés: <b>${esc(lb)}</b> · ${S.guests.length} vendég, ${S.appts.length} időpont</p>
+      <div class="row"><button class="primary" onclick="exportData()">Mentés letöltése</button>
+      <label class="btn" style="margin:0;color:var(--ink);font-size:15px">Visszatöltés<input type="file" accept="application/json,.json" style="display:none" onchange="importData(this)"></label></div></div>`;
+}
+function saveTpl(){ S.template = document.getElementById('tpl').value.trim() || DEF_TPL; save(); toast('Szöveg elmentve'); }
+function exportData(){
+  S.lastBackup = Date.now(); save();
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(S)], {type:'application/json'}));
+  a.download = 'bendi-mentes-' + today() + '.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  render(); toast('Mentés kész! A régebbi mentésfájlt már törölheted a Fájlok appban.');
+}
+function importData(input){
+  const f = input.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      let d = JSON.parse(r.result);
+      if (!Array.isArray(d.guests)) { if (Array.isArray(d.appts)) d = migrate(d); else throw 0; }
+      if (!confirm('A visszatöltés felülírja a mostani adatokat (' + S.guests.length + ' vendég, ' + S.appts.length + ' időpont). Folytatod?')) return;
+      S = fixAppts(Object.assign(blank(), d)); save(); render(); toast('Visszatöltve: ' + S.guests.length + ' vendég, ' + S.appts.length + ' időpont');
+    } catch(e){ toast('Ez nem érvényes mentésfájl.'); }
+  };
+  r.readAsText(f); input.value = '';
+}
+
+/* ---------- start ---------- */
+document.getElementById('nav').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.go === 'book') newBooking(view === 'cal' ? selDay : null); else go(b.dataset.go);
+});
+document.addEventListener('visibilitychange', () => { if (!document.hidden && ['cal','notif'].includes(view)) render(); });
+try { applyTheme(localStorage.getItem('bendi_theme')); } catch(e){}
+load(); selDay = today(); calMonth = selDay.slice(0,8)+'01'; render();
+</script>
+</body>
+</html>
