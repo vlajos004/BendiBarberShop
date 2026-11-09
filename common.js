@@ -28,8 +28,8 @@ export const DEFAULT_PUBLIC = {
 export const DEFAULT_PRIVATE = {
   notifyEmail: '',
   reminderConfirm: true,
-  reminderSubject: 'Holnap {ido}-kor vár a szék',
-  reminderBody: 'Szia {nev}!\n\nEmlékeztetlek, hogy holnap ({datum}) {ido}-kor várlak, {idotartam} időtartamra.\n\nItt tudod megerősíteni vagy lemondani: {link}\n\nHa kérdésed van, válaszolj erre a levélre.\n\nBendi'
+  reminderSubject: 'Emlékeztető: {datum}, {ido}',
+  reminderBody: 'Szia {nev}!\n\nEmlékeztetlek, hogy {mikor} ({datum}) {ido}-kor várlak, {idotartam} időtartamra.\n\nItt tudod megerősíteni vagy lemondani: {link}\n\nHa kérdésed van, válaszolj erre a levélre.\n\nBendi'
 };
 
 export async function loadPublic(){

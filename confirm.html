@@ -30,7 +30,7 @@ const valid = id && token && /^\d{4}-\d{2}-\d{2}$/.test(date || '') && /^\d{2}:\
 const show = h => box.innerHTML = head + h;
 
 if (!valid) show('<h1>Hibás link</h1><p>Ez a link nem teljes. Nyisd meg újra az e-mailből, vagy hívd fel Bendit.</p>');
-else show(`<h1>Jössz holnap?</h1><p>A foglalásod:</p><div class="when">${esc(fmtLong(date))}<br>${esc(start)}</div>
+else show(`<h1>Jössz?</h1><p>A foglalásod:</p><div class="when">${esc(fmtLong(date))}<br>${esc(start)}</div>
   <button class="btn btn-gold" data-a="yes">Igen, ott leszek</button><button class="btn btn-line" data-a="no">Nem tudok jönni, lemondom</button>`);
 
 box.addEventListener('click', async e => {

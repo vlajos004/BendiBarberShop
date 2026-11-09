@@ -197,7 +197,7 @@ function vCal(){
       <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${esc(it.name)}</b><span>${bBadges(it)}</span></div>
       <div class="muted">${esc(bLabel(it))}${it.phone ? ` · <a href="tel:${esc(it.phone.replace(/\s/g, ''))}">${esc(it.phone)}</a>` : ''}</div>
       <div class="row" style="margin-top:8px">${it.status === 'pending' ? `<button class="btn btn-ok btn-sm" data-acc="${it.id}">Elfogadom</button><button class="btn btn-bad btn-sm" data-rej="${it.id}">Elutasítom</button>` : ''}
-      ${it.status === 'accepted' && fut && it.guestConfirm !== 'no' ? `<button class="btn btn-ghost btn-sm" data-acancel="${it.id}">Lemondom</button>` : ''}</div></div></div>`;
+      ${it.status === 'accepted' && fut && it.guestConfirm !== 'no' ? (it.email ? (it.remindNow ? '<span class="badge b-muted">Emlékeztető 5 percen belül megy</span>' : `<button class="btn btn-gold btn-sm" data-remind="${it.id}">Emlékeztető küldése most</button>`) : '') + `<button class="btn btn-ghost btn-sm" data-acancel="${it.id}">Lemondom</button>` : ''}</div></div></div>`;
   }
   h += showNew ? newForm() : `<button class="btn btn-dark" data-act="new" style="width:100%;margin-top:6px">+ Foglalás felvétele erre a napra</button>`;
   return h;
@@ -228,7 +228,7 @@ function vSet(){
     <label class="switch"><span><b>Megerősítés kérése e-mailben</b><br><span class="muted">Az előző napi emlékeztetőben a vendég egy linkkel megerősíti vagy lemondja az időpontot.</span></span><input type="checkbox" name="reminderConfirm" ${Q.reminderConfirm !== false ? 'checked' : ''}></label>
     <label class="field"><span>Értesítési e-mail-cím (ide jönnek az új foglalások)</span><input name="notifyEmail" type="email" value="${esc(Q.notifyEmail)}"></label>
   </div>
-  <div class="card"><h3>Emlékeztető e-mail</h3><p class="muted">Előző nap 16:00 után megy ki minden elfogadott foglaláshoz. Helyettesítők: {nev}, {datum}, {ido}, {idotartam}, {link}. Ha a megerősítés ki van kapcsolva, a {link}-et tartalmazó sor kimarad.</p>
+  <div class="card"><h3>Emlékeztető e-mail</h3><p class="muted">Előző nap 16:00 után automatikusan megy ki minden elfogadott foglaláshoz, a naptárban pedig kézzel is elküldheted. Helyettesítők: {nev}, {mikor} (ma / holnap / dátum), {datum}, {ido}, {idotartam}, {link}. Ha a megerősítés ki van kapcsolva, a {link}-et tartalmazó sor kimarad.</p>
     <label class="field"><span>Tárgy</span><input name="reminderSubject" value="${esc(Q.reminderSubject)}"></label>
     <label class="field"><span>Szöveg</span><textarea name="reminderBody">${esc(Q.reminderBody)}</textarea></label>
     <div class="row"><button type="button" class="btn btn-ghost btn-sm" data-act="preview">Előnézet</button><button type="button" class="btn btn-ghost btn-sm" data-act="tplreset">Alapszöveg visszaállítása</button></div>
@@ -275,7 +275,7 @@ async function saveSettings(e){
 }
 function preview(){
   const f = $('sf'), body = f.elements.reminderBody.value, link = f.elements.reminderConfirm.checked ? 'https://…/confirm.html?…' : null;
-  const vals = { nev: 'Kovács Péter', datum: fmtLong(addDays(today(), 1)), ido: '14:00', idotartam: fmtDur(PUB.durations[0] || 45), link };
+  const vals = { nev: 'Kovács Péter', datum: fmtLong(addDays(today(), 1)), ido: '14:00', idotartam: fmtDur(PUB.durations[0] || 45), mikor: 'holnap', link };
   vals.szolgaltatas = vals.idotartam;
   const fill = s => s.split('\n').filter(l => link || !l.includes('{link}')).join('\n').replace(/\{(\w+)\}/g, (m, k) => vals[k] ?? m);
   const pv = $('pv'); pv.style.display = 'block'; pv.textContent = 'Tárgy: ' + fill(f.elements.reminderSubject.value) + '\n\n' + fill(body);
@@ -327,13 +327,14 @@ async function unblock(id){ const batch = writeBatch(db); batch.delete(doc(db, '
 async function refresh(){ await loadPending(); await render(); }
 
 document.addEventListener('click', async e => {
-  const t = e.target.closest('[data-tab],[data-acc],[data-rej],[data-ban],[data-day],[data-mon],[data-act],[data-unblock],[data-acancel]'); if (!t) return;
+  const t = e.target.closest('[data-tab],[data-acc],[data-rej],[data-ban],[data-day],[data-mon],[data-act],[data-unblock],[data-acancel],[data-remind]'); if (!t) return;
   const d = t.dataset;
   if (d.tab) { tab = d.tab; showNew = false; render(); }
   else if (d.acc) accept(d.acc);
   else if (d.rej) reject(d.rej);
   else if (d.ban) reject(d.ban, true);
   else if (d.acancel) adminCancel(d.acancel);
+  else if (d.remind) { try { await updateDoc(doc(db, 'bookings', d.remind), { remindNow: true }); toast('Az emlékeztető 5 percen belül kimegy.'); await render(); } catch (x) { console.error(x); toast('Nem sikerült.'); } }
   else if (d.unblock) { if (confirm('Feloldod a zárolást?')) unblock(d.unblock); }
   else if (d.day) { selDay = d.day; showNew = false; $('view').innerHTML = vCal(); }
   else if (d.mon) { const x = parse(calMonth); x.setMonth(x.getMonth() + Number(d.mon)); calMonth = toStr(x); selDay = calMonth; render(); }
