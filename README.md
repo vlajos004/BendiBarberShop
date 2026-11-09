@@ -1,2 +1,0 @@
-# BendiBarberShop
-Bendi
