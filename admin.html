@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=5">
 <style>
 body{background:var(--cream);color:var(--text);padding-bottom:calc(30px + env(safe-area-inset-bottom))}
 .top{position:sticky;top:0;z-index:20;background:rgba(236,238,241,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top)) 0 0}
@@ -88,7 +88,7 @@ h2.sec{font-size:22px;margin:24px 0 12px}
 <script type="module">
 import { auth, db, DEFAULT_PUBLIC, DEFAULT_PRIVATE, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail,
   doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, serverTimestamp,
-  today, parse, toStr, addDays, mins, hhmm, fmtLong, fmtShort, fmtDur, bLabel, esc, WEEKDAYS, randToken, STATUS, CONFIRM, toast, authError } from './common.js';
+  today, parse, toStr, addDays, mins, hhmm, fmtLong, fmtShort, fmtDur, bLabel, esc, WEEKDAYS, randToken, STATUS, CONFIRM, toast, authError } from './common.js?v=5';
 
 const $ = id => document.getElementById(id);
 let user = null, PUB = null, PRIV = null, tab = 'req', pending = [], monthB = [], monthBusy = [], blocks = [];

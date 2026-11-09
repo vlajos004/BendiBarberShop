@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -33,8 +33,10 @@
 
 <main class="book" id="foglalas">
   <h2>Foglalás</h2>
-  <div id="flow"></div>
-  <div class="step mine" id="mine" hidden></div>
+  <div class="book-grid">
+    <div><div id="flow"></div><div class="step mine" id="mine" hidden></div></div>
+    <aside class="dayview" id="dayview" aria-label="A kiválasztott nap beosztása"></aside>
+  </div>
 </main>
 
 <section class="info" id="elerhetoseg">
@@ -50,7 +52,7 @@
 <script type="module">
 import { auth, db, loadPublic, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
   sendPasswordResetEmail, updateProfile, doc, getDoc, setDoc, collection, query, where, getDocs, writeBatch, serverTimestamp,
-  today, parse, addDays, mins, hhmm, fmtLong, fmtShort, fmtDur, esc, WEEKDAYS, randToken, slotsFor, STATUS, CONFIRM, toast, authError, bLabel } from './common.js';
+  today, parse, addDays, mins, hhmm, fmtLong, fmtShort, fmtDur, esc, WEEKDAYS, randToken, slotsFor, STATUS, CONFIRM, toast, authError, bLabel } from './common.js?v=5';
 
 let S, user = null, profile = null, busy = [], my = [], regProfile = null;
 const sel = { dur: null, date: null, time: null };
@@ -132,7 +134,31 @@ function renderFlow(){
       <p>${done.status === 'pending' ? 'Bendi hamarosan jóváhagyja a foglalásodat, erről e-mailt kapsz.' : 'Az időpont a tiéd.'} Előző nap délután küldünk egy emlékeztetőt.</p>
       <button class="btn btn-line" data-act="again">Új foglalás</button></section>`;
   } else $('flow').innerHTML = stepDur() + stepDay() + stepTime() + stepYou();
-  renderMine(); renderBar();
+  renderMine(); renderBar(); renderDay();
+}
+// Jobb oldali napi nézet (csak gépen látszik): a nap foglalt sávjai név nélkül, és a vendég saját kiválasztása.
+function renderDay(){
+  const t = today(); let d = sel.date || (done && done.date);
+  for (let i = 0; !d && i <= S.horizonDays; i++) { const x = addDays(t, i); if (S.hours[String(parse(x).getDay())]) d = x; }
+  if (!d) { $('dayview').innerHTML = ''; return; }
+  const h = S.hours[String(parse(d).getDay())], K = 0.9;
+  let body;
+  if (!h) body = '<p class="hint" style="padding:20px">Ezen a napon zárva.</p>';
+  else {
+    const o = mins(h[0]), c = mins(h[1]), y = m => (Math.min(Math.max(m, o), c) - o) * K;
+    let g = '';
+    for (let m = Math.ceil(o / 60) * 60; m <= c; m += 60) g += `<div class="dv-hour" style="top:${y(m)}px"><span>${hhmm(m)}</span></div>`;
+    if (d === t) { const n = new Date(), nm = n.getHours() * 60 + n.getMinutes(); if (nm > o) g += `<div class="dv-past" style="height:${y(nm)}px"></div>`; }
+    for (const b of busy.filter(b => b.date === d)) {
+      const a = y(mins(b.start)), z = y(mins(b.end)); if (z - a < 1) continue;
+      g += `<div class="dv-busy" style="top:${a}px;height:${z - a}px"><span>Foglalt</span></div>`;
+    }
+    const mine = sel.date === d && sel.time && sel.dur ? [sel.time, sel.dur] : done && done.date === d ? [done.start, done.dur] : null;
+    if (mine) { const a = y(mins(mine[0])), z = y(mins(mine[0]) + mine[1]); g += `<div class="dv-mine" style="top:${a}px;height:${z - a}px"><span>Te: ${mine[0]}–${hhmm(mins(mine[0]) + mine[1])}</span></div>`; }
+    body = `<div class="dv-grid" style="height:${(c - o) * K}px">${g}</div>`;
+  }
+  $('dayview').innerHTML = `<div class="dv-h"><b>${esc(cap(fmtLong(d)))}</b><span>${h ? h[0] + '–' + h[1] : 'zárva'}</span></div>${body}
+    <div class="dv-legend"><span><i class="lb"></i>foglalt</span><span><i class="lm"></i>a te időpontod</span></div>`;
 }
 function renderMine(){
   const el = $('mine');
