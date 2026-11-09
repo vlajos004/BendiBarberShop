@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Bendi Időpontfoglalás – admin</title>
+<meta name="theme-color" content="#eceef1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bendi admin">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+body{background:var(--cream);padding-bottom:calc(30px + env(safe-area-inset-bottom))}
+.top{position:sticky;top:0;z-index:20;background:rgba(236,238,241,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top)) 0 0}
+.top .wrap{display:flex;align-items:center;gap:12px}
+.top h1{font-size:24px;flex:1}
+.top h1{font-size:34px}
+.top h1 small{display:block;font:500 13px/1 var(--sans);color:var(--muted);margin-top:2px}
+.atabs{display:flex;gap:4px;overflow-x:auto;margin-top:10px;scrollbar-width:none}
+.atabs button{flex:none;border:0;background:none;padding:12px 14px;font:600 14px/1 var(--sans);color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;position:relative}
+.atabs button.on{color:var(--text);border-color:var(--brass)}
+.atabs .cnt{display:inline-grid;place-items:center;min-width:20px;height:20px;border-radius:10px;background:var(--bad);color:#fff;font-size:11px;margin-left:6px;padding:0 5px}
+main{padding:20px 0}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:12px}
+.card h3{font-size:20px;margin-bottom:6px}
+.muted{color:var(--muted);font-size:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.row .btn{flex:1;min-width:110px}
+.btn-dark{background:var(--text);color:var(--cream)}
+.btn-ok{background:var(--ok);color:#fff}
+.btn-bad{background:#fff;color:var(--bad);border-color:var(--bad)}
+.btn-ghost{background:#fff;border-color:var(--line);color:var(--text)}
+.field span{color:var(--muted)}
+.field input,.field select,.field textarea{background:#fff;border-color:var(--line);color:var(--text)}
+.field textarea{min-height:220px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:15px;margin-top:10px}
+.kv span:nth-child(odd){color:var(--muted)}
+.empty{text-align:center;color:var(--muted);padding:36px 10px}
+h2.sec{font-size:22px;margin:24px 0 12px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal .wd{font-size:12px;text-align:center;font-weight:600;padding-bottom:4px}
+.cal button{aspect-ratio:1;border-radius:12px;border:0;font:600 15px/1 var(--sans);position:relative}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-head strong{font:800 26px/1 var(--display);text-transform:capitalize}
+.icon-btn{width:42px;height:42px;border-radius:50%;border:2px solid var(--line);background:#fff;cursor:pointer;font-size:18px}
+.calbox{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;max-width:560px}
+.ag .row .btn{flex:none}
+.cal .wd{color:var(--muted)}
+.cal button{color:var(--text);background:none;cursor:pointer;flex-direction:column;display:flex;align-items:center;justify-content:center;gap:4px}
+.cal button.today{color:var(--brass);font-weight:700}
+.cal button.on{background:var(--text);color:var(--cream)}
+.cal button.past{color:#b8ad9f}
+.dots{display:flex;gap:2px;height:5px}
+.dots i{width:5px;height:5px;border-radius:50%;background:var(--brass)}
+.dots i.p{background:var(--warn)}
+.dots i.k{background:#b8ad9f}
+.cal-head strong{color:var(--text)}
+.icon-btn{border-color:var(--line);color:var(--text);background:#fff}
+.ag{display:flex;gap:14px;align-items:flex-start}
+.ag .tm{min-width:62px;border-right:2px solid var(--brass);padding-right:10px}
+.ag .tm b{display:block;font-size:18px}
+.ag .tm span{font-size:12px;color:var(--muted)}
+.ag.block .tm{border-color:#b8ad9f}
+.ag.faded{opacity:.5}
+.ag .body{flex:1;min-width:0}
+.switch{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
+.switch:last-child{border-bottom:0}
+.switch input{width:52px;height:30px;appearance:none;-webkit-appearance:none;background:#d9cfc1;border-radius:15px;position:relative;cursor:pointer;flex:none;transition:background .2s}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s var(--ease);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.switch input:checked{background:var(--ok)}
+.switch input:checked::after{transform:translateX(22px)}
+.hrow{display:grid;grid-template-columns:96px 1fr 1fr auto;gap:8px;align-items:center;padding:6px 0}
+.hrow input[type=time]{min-height:42px;padding:8px}
+.svc-ed{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.login{max-width:420px;margin:12vh auto 0}
+.chip{border-color:var(--line);background:#fff}
+.chip.on{background:var(--text);border-color:var(--text);color:var(--cream)}
+.chip small{color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="app"><div class="empty">Betöltés…</div></div>
+
+<script type="module">
+import { auth, db, DEFAULT_PUBLIC, DEFAULT_PRIVATE, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail,
+  doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, serverTimestamp,
+  today, parse, toStr, addDays, mins, hhmm, fmtLong, fmtShort, fmtDur, bLabel, esc, WEEKDAYS, randToken, STATUS, CONFIRM, toast, authError } from './common.js';
+
+const $ = id => document.getElementById(id);
+let user = null, PUB = null, PRIV = null, tab = 'req', pending = [], monthB = [], monthBusy = [], blocks = [];
+let calMonth = today().slice(0, 8) + '01', selDay = today(), showNew = false;
+
+/* ---------- belépés ---------- */
+function loginView(msg = ''){
+  $('app').innerHTML = `<div class="wrap"><div class="card login"><h1 style="font-size:44px">Bendi admin</h1><p class="muted">Lépj be a foglalások kezeléséhez.</p>
+    <form id="lf"><label class="field"><span>E-mail</span><input name="email" type="email" autocomplete="username" required></label>
+    <label class="field"><span>Jelszó</span><input name="password" type="password" autocomplete="current-password" required></label>
+    <button class="btn btn-gold" style="width:100%;margin-top:18px">Belépés</button>
+    <p style="text-align:center;margin:12px 0 0"><button type="button" class="linkish" id="reset">Elfelejtett jelszó</button></p>
+    <p class="err" id="lerr" style="color:var(--bad)">${esc(msg)}</p></form>
+    <p class="muted" style="margin-top:18px">Az admin fiókot egyszer, a telepítési útmutató szerint kell beállítani.</p><p><a href="index.html">← Vissza a weboldalra</a></p></div></div>`;
+  $('lf').onsubmit = async e => { e.preventDefault(); const f = Object.fromEntries(new FormData(e.target));
+    try { await signInWithEmailAndPassword(auth, f.email.trim(), f.password); } catch (x) { $('lerr').textContent = authError(x); } };
+  $('reset').onclick = async () => { const em = document.querySelector('#lf [name=email]').value.trim(); if (!em) { $('lerr').textContent = 'Írd be az e-mail-címed.'; return; }
+    try { await sendPasswordResetEmail(auth, em); toast('Jelszó-visszaállító e-mail elküldve.'); } catch (x) { $('lerr').textContent = authError(x); } };
+}
+
+/* ---------- adatok ---------- */
+async function loadSettings(){
+  const [a, b] = await Promise.all([getDoc(doc(db, 'settings', 'public')), getDoc(doc(db, 'settings', 'private'))]);
+  PUB = Object.assign({}, DEFAULT_PUBLIC, a.exists() ? a.data() : {});
+  PRIV = Object.assign({}, DEFAULT_PRIVATE, b.exists() ? b.data() : {});
+  // első indításkor létrehozzuk az alapbeállításokat, hogy a weboldal és az e-mail-szkript lássa őket
+  if (!a.exists()) await setDoc(doc(db, 'settings', 'public'), PUB);
+  if (!b.exists()) await setDoc(doc(db, 'settings', 'private'), { ...PRIV, notifyEmail: PRIV.notifyEmail || user.email });
+  if (!b.exists()) PRIV.notifyEmail = PRIV.notifyEmail || user.email;
+}
+async function loadPending(){
+  const s = await getDocs(query(collection(db, 'bookings'), where('status', '==', 'pending')));
+  pending = s.docs.map(d => ({ id: d.id, ...d.data() })).sort(byTime);
+}
+async function loadMonth(){
+  const d0 = parse(calMonth), from = calMonth, to = toStr(new Date(d0.getFullYear(), d0.getMonth() + 1, 0));
+  const [b, k] = await Promise.all([
+    getDocs(query(collection(db, 'bookings'), where('date', '>=', from), where('date', '<=', to))),
+    getDocs(query(collection(db, 'busy'), where('date', '>=', from), where('date', '<=', to)))]);
+  monthB = b.docs.map(d => ({ id: d.id, ...d.data() }));
+  monthBusy = k.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+async function loadBlocks(){
+  const s = await getDocs(query(collection(db, 'busy'), where('date', '>=', today())));
+  blocks = s.docs.map(d => ({ id: d.id, ...d.data() })).filter(x => x.kind === 'block').sort(byTime);
+}
+const byTime = (a, b) => (a.date + a.start).localeCompare(b.date + b.start);
+const badge = ([t, c]) => `<span class="badge b-${c}">${t}</span>`;
+const bBadges = b => badge(STATUS[b.status] || ['?', 'muted']) + (b.status === 'accepted' && b.guestConfirm ? ' ' + badge(CONFIRM[b.guestConfirm]) : (b.status === 'accepted' && b.reminded && PRIV.reminderConfirm ? ' ' + badge(['Nem válaszolt még', 'muted']) : ''));
+
+/* ---------- felület ---------- */
+function shell(){
+  $('app').innerHTML = `<div class="top"><div class="wrap"><h1>Bendi<small>Admin felület</small></h1>
+      <a class="btn btn-ghost btn-sm" href="index.html" target="_blank">Weboldal</a><button class="btn btn-ghost btn-sm" id="out">Kilépés</button></div>
+      <div class="wrap atabs" id="tabs"></div></div><main class="wrap" id="view"></main>`;
+  $('out').onclick = () => signOut(auth);
+}
+function renderTabs(){
+  const t = [['req', 'Kérések', pending.length], ['cal', 'Naptár'], ['block', 'Zárolás'], ['set', 'Beállítások']];
+  $('tabs').innerHTML = t.map(([k, n, c]) => `<button class="${tab === k ? 'on' : ''}" data-tab="${k}">${n}${c ? `<span class="cnt">${c}</span>` : ''}</button>`).join('');
+}
+async function render(){
+  renderTabs();
+  const v = $('view');
+  if (tab === 'req') v.innerHTML = vReq();
+  if (tab === 'cal') { await loadMonth(); v.innerHTML = vCal(); }
+  if (tab === 'block') { await loadBlocks(); v.innerHTML = vBlock(); }
+  if (tab === 'set') { v.innerHTML = vSet(); bindSet(); }
+}
+
+function bookingCard(b, actions){
+  return `<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><h3>${esc(b.name || '(név nélkül)')}</h3>${bBadges(b)}</div>
+    <div class="kv"><span>Időpont</span><span><b>${esc(fmtLong(b.date))}, ${esc(b.start)}–${esc(b.end)}</b></span>
+    <span>Időtartam</span><span>${esc(bLabel(b))}</span>
+    ${b.phone ? `<span>Telefon</span><span><a href="tel:${esc(b.phone.replace(/\s/g, ''))}">${esc(b.phone)}</a></span>` : ''}
+    ${b.email ? `<span>E-mail</span><span><a href="mailto:${esc(b.email)}">${esc(b.email)}</a></span>` : ''}</div>
+    <div class="row">${actions}</div></div>`;
+}
+function vReq(){
+  if (!pending.length) return '<div class="empty">Nincs jóváhagyásra váró foglalás. 🎉</div>';
+  return `<p class="muted">A jóváhagyásra váró időpontok a weboldalon már foglaltként látszanak.</p>` + pending.map(b => bookingCard(b,
+    `<button class="btn btn-ok" data-acc="${b.id}">Elfogadom</button><button class="btn btn-bad" data-rej="${b.id}">Elutasítom</button><button class="btn btn-ghost btn-sm" data-ban="${b.id}" title="Elutasítja és letiltja a felhasználót">Letiltás</button>`)).join('');
+}
+
+function vCal(){
+  const t = today(), d0 = parse(calMonth), y = d0.getFullYear(), m = d0.getMonth();
+  let h = `<div class="calbox"><div class="cal-head"><button class="icon-btn" data-mon="-1" aria-label="Előző hónap">‹</button><strong>${d0.toLocaleDateString('hu-HU', { year: 'numeric', month: 'long' })}</strong><button class="icon-btn" data-mon="1" aria-label="Következő hónap">›</button></div><div class="cal">`;
+  h += ['H', 'K', 'Sze', 'Cs', 'P', 'Szo', 'V'].map(w => `<div class="wd">${w}</div>`).join('');
+  for (let i = 0; i < (d0.getDay() + 6) % 7; i++) h += '<div></div>';
+  for (let d = 1; d <= new Date(y, m + 1, 0).getDate(); d++){
+    const ds = toStr(new Date(y, m, d));
+    const bs = monthB.filter(b => b.date === ds && ['pending', 'accepted'].includes(b.status) && b.guestConfirm !== 'no');
+    const blk = monthBusy.some(x => x.date === ds && x.kind === 'block');
+    const dots = bs.slice(0, 4).map(b => `<i class="${b.status === 'pending' ? 'p' : ''}"></i>`).join('') + (blk ? '<i class="k"></i>' : '');
+    h += `<button class="${ds === t ? 'today' : ''} ${ds === selDay ? 'on' : ''} ${ds < t ? 'past' : ''}" data-day="${ds}" aria-label="${fmtLong(ds)}, ${bs.length} foglalás">${d}<span class="dots">${dots}</span></button>`;
+  }
+  h += `</div></div><p class="muted" style="margin:8px 4px 0">Pötty: piros = elfogadott, narancs = jóváhagyásra vár, szürke = zárolás.</p>`;
+  const items = [...monthB.filter(b => b.date === selDay).map(b => ({ t: 'b', ...b })), ...monthBusy.filter(x => x.date === selDay && x.kind === 'block').map(x => ({ t: 'k', ...x }))].sort(byTime);
+  h += `<h2 class="sec">${esc(fmtLong(selDay))}</h2>`;
+  if (!items.length) h += '<div class="card muted">Erre a napra nincs foglalás.</div>';
+  for (const it of items){
+    if (it.t === 'k') { h += `<div class="card ag block"><div class="tm"><b>${it.start === '00:00' && it.end === '23:59' ? 'Egész' : it.start}</b><span>${it.start === '00:00' && it.end === '23:59' ? 'nap' : it.end + '-ig'}</span></div><div class="body"><b>Zárolva</b><div class="row" style="margin-top:8px"><button class="btn btn-ghost btn-sm" data-unblock="${it.id}">Feloldás</button></div></div></div>`; continue; }
+    const live = ['pending', 'accepted'].includes(it.status) && it.guestConfirm !== 'no';
+    const fut = it.date >= t;
+    h += `<div class="card ag ${live ? '' : 'faded'}"><div class="tm"><b>${esc(it.start)}</b><span>${esc(it.end)}-ig</span></div><div class="body">
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${esc(it.name)}</b><span>${bBadges(it)}</span></div>
+      <div class="muted">${esc(bLabel(it))}${it.phone ? ` · <a href="tel:${esc(it.phone.replace(/\s/g, ''))}">${esc(it.phone)}</a>` : ''}</div>
+      <div class="row" style="margin-top:8px">${it.status === 'pending' ? `<button class="btn btn-ok btn-sm" data-acc="${it.id}">Elfogadom</button><button class="btn btn-bad btn-sm" data-rej="${it.id}">Elutasítom</button>` : ''}
+      ${it.status === 'accepted' && fut && it.guestConfirm !== 'no' ? `<button class="btn btn-ghost btn-sm" data-acancel="${it.id}">Lemondom</button>` : ''}</div></div></div>`;
+  }
+  h += showNew ? newForm() : `<button class="btn btn-dark" data-act="new" style="width:100%;margin-top:6px">+ Foglalás felvétele erre a napra</button>`;
+  return h;
+}
+function newForm(){
+  return `<div class="card"><h3>Új foglalás – ${esc(fmtShort(selDay))}</h3><p class="muted">Telefonos vagy személyes foglaláshoz. Azonnal elfogadottként kerül be.</p>
+    <form id="nf"><label class="field"><span>Név</span><input name="name" required></label>
+    <div class="grid2"><label class="field"><span>Telefon</span><input name="phone" type="tel"></label><label class="field"><span>E-mail (emlékeztetőhöz)</span><input name="email" type="email"></label></div>
+    <div class="grid2"><label class="field"><span>Időtartam</span><select name="dur">${[15,30,45,60,75,90,120,150,180].map(v => `<option value="${v}" ${v === (PUB.durations[0] || 30) ? 'selected' : ''}>${fmtDur(v)}</option>`).join('')}</select></label>
+    <label class="field"><span>Kezdés</span><input name="time" type="time" step="300" required></label></div>
+    <div class="row"><button class="btn btn-gold">Mentés</button><button type="button" class="btn btn-ghost" data-act="cancelnew">Mégse</button></div></form></div>`;
+}
+
+function vBlock(){
+  return `<div class="card"><h3>Zárolás hozzáadása</h3><p class="muted">A zárolt időben senki nem tud foglalni (szabadság, orvos, magánprogram).</p>
+    <form id="bf"><div class="grid2"><label class="field"><span>Első nap</span><input name="from" type="date" value="${today()}" required></label><label class="field"><span>Utolsó nap</span><input name="to" type="date" value="${today()}" required></label></div>
+    <label class="check" style="color:var(--text)"><input type="checkbox" name="whole" checked id="whole"><span>Egész nap</span></label>
+    <div class="grid2" id="bt" style="display:none"><label class="field"><span>Ettől</span><input name="start" type="time" value="12:00" step="300"></label><label class="field"><span>Eddig</span><input name="end" type="time" value="13:00" step="300"></label></div>
+    <div class="row"><button class="btn btn-gold">Zárolás</button></div></form></div>
+    <h2 class="sec">Közelgő zárolások</h2>${blocks.length ? blocks.map(x => `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><b>${esc(fmtLong(x.date))}</b><div class="muted">${x.start === '00:00' && x.end === '23:59' ? 'Egész nap' : x.start + '–' + x.end}</div></div><button class="btn btn-ghost btn-sm" data-unblock="${x.id}">Feloldás</button></div>`).join('') : '<div class="card muted">Nincs zárolás.</div>'}`;
+}
+
+function vSet(){
+  const P = PUB, Q = PRIV;
+  return `<form id="sf">
+  <div class="card"><h3>Működés</h3>
+    <label class="switch"><span><b>Foglalások jóváhagyása</b><br><span class="muted">Bekapcsolva minden új foglalást neked kell elfogadnod. Kikapcsolva azonnal elfogadottak.</span></span><input type="checkbox" name="requireApproval" ${P.requireApproval !== false ? 'checked' : ''}></label>
+    <label class="switch"><span><b>Megerősítés kérése e-mailben</b><br><span class="muted">Az előző napi emlékeztetőben a vendég egy linkkel megerősíti vagy lemondja az időpontot.</span></span><input type="checkbox" name="reminderConfirm" ${Q.reminderConfirm !== false ? 'checked' : ''}></label>
+    <label class="field"><span>Értesítési e-mail-cím (ide jönnek az új foglalások)</span><input name="notifyEmail" type="email" value="${esc(Q.notifyEmail)}"></label>
+  </div>
+  <div class="card"><h3>Emlékeztető e-mail</h3><p class="muted">Előző nap 16:00 után megy ki minden elfogadott foglaláshoz. Helyettesítők: {nev}, {datum}, {ido}, {idotartam}, {link}. Ha a megerősítés ki van kapcsolva, a {link}-et tartalmazó sor kimarad.</p>
+    <label class="field"><span>Tárgy</span><input name="reminderSubject" value="${esc(Q.reminderSubject)}"></label>
+    <label class="field"><span>Szöveg</span><textarea name="reminderBody">${esc(Q.reminderBody)}</textarea></label>
+    <div class="row"><button type="button" class="btn btn-ghost btn-sm" data-act="preview">Előnézet</button><button type="button" class="btn btn-ghost btn-sm" data-act="tplreset">Alapszöveg visszaállítása</button></div>
+    <pre id="pv" style="white-space:pre-wrap;font:14px/1.5 var(--sans);background:var(--cream);padding:12px;border-radius:12px;display:none"></pre>
+  </div>
+  <div class="card"><h3>Nyitvatartás</h3>${[1,2,3,4,5,6,0].map(d => { const h = P.hours[String(d)]; return `<div class="hrow"><b>${WEEKDAYS[d]}</b>
+      <input type="time" step="900" name="h${d}a" value="${h ? h[0] : '09:00'}" ${h ? '' : 'disabled'}><input type="time" step="900" name="h${d}b" value="${h ? h[1] : '18:00'}" ${h ? '' : 'disabled'}>
+      <label class="check" style="margin:0;color:var(--text)"><input type="checkbox" name="h${d}x" data-closed="${d}" ${h ? '' : 'checked'}><span>Zárva</span></label></div>`; }).join('')}
+    <div class="grid2"><label class="field"><span>Időpontok lépésköze</span><select name="slotStep">${[15, 30].map(v => `<option ${P.slotStep == v ? 'selected' : ''} value="${v}">${v} perc</option>`).join('')}</select></label>
+    <label class="field"><span>Ennyi napra előre lehet foglalni</span><input name="horizonDays" type="number" min="1" max="120" value="${P.horizonDays}"></label></div>
+    <div class="grid2"><label class="field"><span>Legalább ennyi órával előre lehet foglalni</span><input name="minNoticeHours" type="number" min="0" max="72" value="${P.minNoticeHours}"></label>
+    <label class="field"><span>Egy vendég jövőbeli foglalásai legfeljebb</span><input name="maxActive" type="number" min="1" max="10" value="${P.maxActive || 2}"></label></div>
+  </div>
+  <div class="card"><h3>Választható időtartamok</h3><p class="muted">A vendég ezek közül választ foglaláskor.</p><div class="chips" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">${[15,30,45,60,75,90,120,150,180].map(v => `<label class="check" style="margin:0;color:var(--text);background:#fff;border:2px solid var(--line);border-radius:10px;padding:8px 12px"><input type="checkbox" name="dur${v}" ${(P.durations || []).includes(v) ? 'checked' : ''}><span>${fmtDur(v)}</span></label>`).join('')}</div></div>
+  <div class="card"><h3>Elérhetőség</h3><p class="muted">Ezek látszanak a weboldal alján.</p>
+    <label class="field"><span>Cím</span><input name="address" value="${esc(P.address)}"></label>
+    <div class="grid2"><label class="field"><span>Telefon</span><input name="phone" value="${esc(P.phone)}"></label><label class="field"><span>Nyilvános e-mail</span><input name="publicEmail" type="email" value="${esc(P.publicEmail)}"></label></div>
+    <label class="field"><span>Instagram (felhasználónév)</span><input name="instagram" value="${esc(P.instagram)}"></label>
+  </div>
+  <button class="btn btn-gold" style="width:100%;position:sticky;bottom:calc(14px + env(safe-area-inset-bottom))">Beállítások mentése</button></form>`;
+}
+function bindSet(){
+  document.querySelectorAll('[data-closed]').forEach(c => c.onchange = () => { const d = c.dataset.closed; document.querySelectorAll(`[name=h${d}a],[name=h${d}b]`).forEach(i => i.disabled = c.checked); });
+  $('sf').onsubmit = saveSettings;
+}
+async function saveSettings(e){
+  e.preventDefault();
+  const f = e.target, v = n => f.elements[n].value.trim(), on = n => f.elements[n].checked;
+  const hours = {};
+  for (const d of [0,1,2,3,4,5,6]) {
+    if (on('h' + d + 'x')) { hours[d] = null; continue; }
+    const a = v('h' + d + 'a'), b = v('h' + d + 'b');
+    if (!a || !b || mins(a) >= mins(b)) { toast(`${WEEKDAYS[d]}: a zárás legyen későbbi, mint a nyitás.`); return; }
+    hours[d] = [a, b];
+  }
+  const durations = [15,30,45,60,75,90,120,150,180].filter(x => on('dur' + x));
+  if (!durations.length) { toast('Legalább egy időtartamot jelölj be.'); return; }
+  const pub = { ...PUB, address: v('address'), phone: v('phone'),
+    publicEmail: v('publicEmail'), instagram: v('instagram').replace('@', ''), hours, durations, slotStep: Number(v('slotStep')),
+    horizonDays: Math.max(1, Number(v('horizonDays')) || 14), maxActive: Math.max(1, Number(v('maxActive')) || 2), minNoticeHours: Math.max(0, Number(v('minNoticeHours')) || 0), requireApproval: on('requireApproval') };
+  const priv = { ...PRIV, notifyEmail: v('notifyEmail'), reminderConfirm: on('reminderConfirm'), reminderSubject: v('reminderSubject') || DEFAULT_PRIVATE.reminderSubject, reminderBody: f.elements.reminderBody.value.trim() || DEFAULT_PRIVATE.reminderBody };
+  try { await Promise.all([setDoc(doc(db, 'settings', 'public'), pub), setDoc(doc(db, 'settings', 'private'), priv)]); PUB = pub; PRIV = priv; toast('Beállítások elmentve.'); }
+  catch (x) { console.error(x); toast('Nem sikerült menteni.'); }
+}
+function preview(){
+  const f = $('sf'), body = f.elements.reminderBody.value, link = f.elements.reminderConfirm.checked ? 'https://…/confirm.html?…' : null;
+  const vals = { nev: 'Kovács Péter', datum: fmtLong(addDays(today(), 1)), ido: '14:00', idotartam: fmtDur(PUB.durations[0] || 45), link };
+  vals.szolgaltatas = vals.idotartam;
+  const fill = s => s.split('\n').filter(l => link || !l.includes('{link}')).join('\n').replace(/\{(\w+)\}/g, (m, k) => vals[k] ?? m);
+  const pv = $('pv'); pv.style.display = 'block'; pv.textContent = 'Tárgy: ' + fill(f.elements.reminderSubject.value) + '\n\n' + fill(body);
+}
+
+/* ---------- műveletek ---------- */
+async function accept(id){
+  try { await updateDoc(doc(db, 'bookings', id), { status: 'accepted', decisionMailed: false }); toast('Elfogadva. A vendég e-mailt kap.'); await refresh(); } catch (e) { console.error(e); toast('Hiba történt.'); }
+}
+async function reject(id, ban = false){
+  const b = pending.find(x => x.id === id) || monthB.find(x => x.id === id);
+  if (ban && !confirm(`Elutasítod, és letiltod ${b?.name || 'a felhasználót'}? Többé nem tud foglalni.`)) return;
+  try {
+    const batch = writeBatch(db);
+    batch.update(doc(db, 'bookings', id), { status: 'rejected', decisionMailed: ban });  // tiltottnak nem küldünk levelet
+    batch.delete(doc(db, 'busy', id));
+    if (ban && b?.uid && b.uid !== 'admin') batch.set(doc(db, 'banned', b.uid), { name: b.name || '', email: b.email || '', at: serverTimestamp() });
+    await batch.commit(); toast(ban ? 'Elutasítva és letiltva.' : 'Elutasítva. A vendég e-mailt kap.'); await refresh();
+  } catch (e) { console.error(e); toast('Hiba történt.'); }
+}
+async function adminCancel(id){
+  const b = monthB.find(x => x.id === id); if (!confirm(`Lemondod ${b.name} időpontját (${fmtShort(b.date)} ${b.start})? A vendég e-mailt kap róla.`)) return;
+  const batch = writeBatch(db);
+  batch.update(doc(db, 'bookings', id), { status: 'cancelled', cancelledBy: 'admin', decisionMailed: false });
+  batch.delete(doc(db, 'busy', id));
+  await batch.commit(); toast('Lemondva.'); await refresh();
+}
+async function addBooking(e){
+  e.preventDefault();
+  const f = Object.fromEntries(new FormData(e.target)), dur = Number(f.dur), end = hhmm(mins(f.time) + dur);
+  const clash = monthBusy.find(x => x.date === selDay && mins(x.start) < mins(end) && mins(f.time) < mins(x.end));
+  if (clash && !confirm(`Ütközik egy ${clash.kind === 'block' ? 'zárolással' : 'foglalással'} (${clash.start}–${clash.end}). Mégis mented?`)) return;
+  const ref = doc(collection(db, 'bookings')), batch = writeBatch(db);
+  batch.set(ref, { uid: 'admin', name: f.name.trim(), email: f.email.trim(), phone: f.phone.trim(), dur,
+    date: selDay, start: f.time, end, status: 'accepted', guestConfirm: null, token: randToken(), notified: true, reminded: false, decisionMailed: true, created: serverTimestamp() });
+  batch.set(doc(db, 'busy', ref.id), { date: selDay, start: f.time, end, kind: 'booking' });
+  try { await batch.commit(); showNew = false; toast('Foglalás felvéve.'); await refresh(); } catch (x) { console.error(x); toast('Nem sikerült menteni.'); }
+}
+async function addBlock(e){
+  e.preventDefault();
+  const f = Object.fromEntries(new FormData(e.target)), whole = !!f.whole;
+  if (f.to < f.from) { toast('Az utolsó nap nem lehet az első előtt.'); return; }
+  if (!whole && mins(f.start) >= mins(f.end)) { toast('A zárolás vége legyen később, mint az eleje.'); return; }
+  const batch = writeBatch(db); let n = 0;
+  for (let d = f.from; d <= f.to && n < 60; d = addDays(d, 1), n++) batch.set(doc(collection(db, 'busy')), { date: d, start: whole ? '00:00' : f.start, end: whole ? '23:59' : f.end, kind: 'block' });
+  await batch.commit(); toast(`Zárolva (${n} nap).`); await render();
+}
+async function unblock(id){ const batch = writeBatch(db); batch.delete(doc(db, 'busy', id)); await batch.commit(); toast('Zárolás feloldva.'); await render(); }
+async function refresh(){ await loadPending(); await render(); }
+
+document.addEventListener('click', async e => {
+  const t = e.target.closest('[data-tab],[data-acc],[data-rej],[data-ban],[data-day],[data-mon],[data-act],[data-unblock],[data-acancel]'); if (!t) return;
+  const d = t.dataset;
+  if (d.tab) { tab = d.tab; showNew = false; render(); }
+  else if (d.acc) accept(d.acc);
+  else if (d.rej) reject(d.rej);
+  else if (d.ban) reject(d.ban, true);
+  else if (d.acancel) adminCancel(d.acancel);
+  else if (d.unblock) { if (confirm('Feloldod a zárolást?')) unblock(d.unblock); }
+  else if (d.day) { selDay = d.day; showNew = false; $('view').innerHTML = vCal(); }
+  else if (d.mon) { const x = parse(calMonth); x.setMonth(x.getMonth() + Number(d.mon)); calMonth = toStr(x); selDay = calMonth; render(); }
+  else if (d.act === 'new') { showNew = true; $('view').innerHTML = vCal(); $('nf').scrollIntoView({ behavior: 'smooth' }); }
+  else if (d.act === 'cancelnew') { showNew = false; $('view').innerHTML = vCal(); }
+  else if (d.act === 'preview') preview();
+  else if (d.act === 'tplreset') { const f = $('sf'); f.elements.reminderSubject.value = DEFAULT_PRIVATE.reminderSubject; f.elements.reminderBody.value = DEFAULT_PRIVATE.reminderBody; }
+});
+document.addEventListener('submit', e => { if (e.target.id === 'nf') addBooking(e); if (e.target.id === 'bf') addBlock(e); });
+document.addEventListener('change', e => { if (e.target.id === 'whole') $('bt').style.display = e.target.checked ? 'none' : 'grid'; });
+
+onAuthStateChanged(auth, async u => {
+  user = u;
+  if (!u) return loginView();
+  try {
+    const a = await getDoc(doc(db, 'admins', u.uid));
+    if (!a.exists()) { await signOut(auth); return loginView('Ehhez a fiókhoz nincs admin jogosultság.'); }
+    await loadSettings(); await loadPending(); shell(); await render();
+  } catch (e) { console.error(e); loginView('Nem sikerült betölteni az adatokat. Ellenőrizd a beállításokat.'); }
+});
+</script>
+</body>
+</html>

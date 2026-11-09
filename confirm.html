@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Időpont megerősítése</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+body{background:var(--ink);color:var(--cream);min-height:100svh;display:grid;place-items:center;padding:20px}
+.box{max-width:440px;width:100%;text-align:center}
+.box .logo{justify-content:center;margin-bottom:28px}
+.box h1{font-size:clamp(52px,14vw,72px);margin-bottom:12px}
+.when{font:700 24px/1.3 var(--sans);color:#fff;margin:18px 0 28px}
+.box .btn{width:100%;margin-top:10px}
+
+p{color:var(--soft)}
+</style>
+</head>
+<body>
+<div class="box" id="box"><a class="logo" href="index.html"><i>BENDI</i><span>Időpontfoglalás</span></a><p>Betöltés…</p></div>
+<script type="module">
+import { db, doc, writeBatch, fmtLong, esc } from './common.js';
+const q = new URLSearchParams(location.search), id = q.get('b'), token = q.get('t'), date = q.get('d'), start = q.get('s');
+const box = document.getElementById('box'), head = box.firstElementChild.outerHTML;
+const valid = id && token && /^\d{4}-\d{2}-\d{2}$/.test(date || '') && /^\d{2}:\d{2}$/.test(start || '');
+const show = h => box.innerHTML = head + h;
+
+if (!valid) show('<h1>Hibás link</h1><p>Ez a link nem teljes. Nyisd meg újra az e-mailből, vagy hívd fel Bendit.</p>');
+else show(`<h1>Jössz holnap?</h1><p>A foglalásod:</p><div class="when">${esc(fmtLong(date))}<br>${esc(start)}</div>
+  <button class="btn btn-gold" data-a="yes">Igen, ott leszek</button><button class="btn btn-line" data-a="no">Nem tudok jönni, lemondom</button>`);
+
+box.addEventListener('click', async e => {
+  const a = e.target.closest('[data-a]')?.dataset.a; if (!a) return;
+  if (a === 'no' && !confirm('Biztosan lemondod az időpontot?')) return;
+  box.querySelectorAll('button').forEach(b => b.disabled = true);
+  try {
+    const batch = writeBatch(db);
+    batch.update(doc(db, 'bookings', id), { guestConfirm: a, confirmToken: token });
+    if (a === 'no') batch.delete(doc(db, 'busy', id));  // felszabadul az időpont
+    await batch.commit();
+    show(a === 'yes' ? '<h1>Köszönöm!</h1><p>Várlak holnap. Ha mégis közbejönne valami, hívj fel.</p><a class="btn btn-line" href="index.html">Vissza a weboldalra</a>'
+      : '<h1>Lemondva</h1><p>Köszönöm, hogy szóltál. Ha új időpontot szeretnél, foglalj a weboldalon.</p><a class="btn btn-gold" href="index.html#foglalas">Új időpont foglalása</a>');
+  } catch (err) {
+    console.error(err);
+    show('<h1>Ezt már nem lehet módosítani</h1><p>Lehet, hogy már válaszoltál, vagy az időpontot közben módosították. Ha kérdésed van, hívd fel Bendit.</p><a class="btn btn-line" href="index.html">Vissza a weboldalra</a>');
+  }
+});
+</script>
+</body>
+</html>

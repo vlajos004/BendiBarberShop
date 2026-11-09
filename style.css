@@ -1,0 +1,154 @@
+/* Bendi Időpontfoglalás – fekete (~60%), fehér (~35%), piros (~5%, csak kattintható elemeken) */
+:root{
+  --black:#000; --black-2:#141414; --black-3:#2b2b2b; --white:#fff; --gray:#f2f2f2; --rule:#e2e2e2; --steel:#767676; --soft:#a8a8a8;
+  --red:#d7262e; --red-2:#ee3a42;
+  --ok:#1d7a4a; --ok-bg:#e3f3ea; --warn:#9a5a0d; --warn-bg:#fbefd9; --bad:#b3262d; --bad-bg:#fbe3e4;
+  --display:'Big Shoulders Display','Arial Narrow',Impact,sans-serif;
+  --sans:'Instrument Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --ease:cubic-bezier(.2,.7,.2,1);
+  /* régi nevek (admin és visszaigazoló oldal) */
+  --navy:var(--black); --navy-2:var(--black-2); --navy-3:var(--black-3); --tile:var(--gray); --ink-t:var(--black);
+  --cream:var(--gray); --paper:var(--gray); --line:var(--rule); --muted:var(--steel); --text:var(--black);
+  --brass:var(--red); --brass-2:var(--red-2); --brass-ink:#fff; --ink:var(--black); --serif:var(--display);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;background:var(--black)}
+body{margin:0;font:16px/1.55 var(--sans);color:var(--black);background:var(--black)}
+a{color:inherit}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+h1,h2,h3{font-family:var(--display);font-weight:800;line-height:.95;margin:0}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+
+.btn{font:600 16px/1 var(--sans);display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 26px;border-radius:999px;border:2px solid transparent;cursor:pointer;text-decoration:none;transition:background .2s,color .2s,transform .15s}
+.btn:active{transform:scale(.98)}
+.btn-gold,.btn-red{background:var(--red);color:#fff}
+.btn-gold:hover,.btn-red:hover{background:var(--red-2)}
+.btn-line{border-color:var(--red);background:transparent;color:var(--red)}
+.btn-line:hover{background:var(--red);color:#fff}
+.btn[disabled]{background:var(--rule);color:var(--steel);border-color:transparent;cursor:not-allowed;transform:none}
+.btn-sm{min-height:40px;padding:0 16px;font-size:14px}
+.linkish{background:none;border:0;color:var(--red);font:inherit;font-size:14px;font-weight:600;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}
+.logo{display:inline-flex;align-items:baseline;gap:10px;text-decoration:none;color:inherit}
+.logo i{font:800 30px/1 var(--display);font-style:normal}
+.logo span{font-size:15px;opacity:.7}
+
+/* ---------- felső sáv ---------- */
+.top{position:sticky;top:0;z-index:50;background:rgba(0,0,0,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff;display:flex;align-items:center;gap:16px;padding:calc(10px + env(safe-area-inset-top)) 20px 10px;border-bottom:1px solid var(--black-3)}
+.brand{font:800 26px/1 var(--display);text-decoration:none}
+.top-links{margin-left:auto;display:flex;align-items:center;gap:18px;font-size:15px}
+.top-links > a{text-decoration:none;color:var(--soft)}
+.top-links > a:hover{color:#fff}
+.top-btn{display:inline-flex;align-items:center;min-height:38px;padding:0 16px;border-radius:999px;border:2px solid var(--red);color:#fff;text-decoration:none;font-weight:600;font-size:14px}
+.top-btn:hover{background:var(--red)}
+
+/* ---------- nyitókép: átalakuló eszközök ---------- */
+.hero{background:var(--black);color:#fff;max-width:1100px;margin:0 auto;padding:56px 20px 80px;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:40px;min-height:min(78svh,720px)}
+.hero h1{font-size:clamp(44px,min(9.5vw,6.8vw + 12px),96px);font-weight:800;letter-spacing:-.01em;margin-bottom:18px}
+.hero p{margin:0 0 30px;max-width:42ch;color:var(--soft);font-size:18px}
+.morph{margin:0;justify-self:center;width:min(360px,80vw);text-align:center}
+.morph svg{width:100%;height:auto;display:block}
+.morph polygon{fill:#fff}
+.morph figcaption{margin-top:14px;font-size:15px;color:var(--soft);min-height:1.5em;transition:opacity .35s}
+.morph figcaption.out{opacity:0}
+@media (max-width:760px){
+  .hero{grid-template-columns:1fr;gap:12px;padding:28px 20px 56px;min-height:0}
+  .morph{order:-1;width:min(220px,58vw)}
+  .morph figcaption{margin-top:6px}
+}
+
+/* ---------- foglalás (fehér) ---------- */
+.book{background:var(--white);padding:72px 20px 110px}
+.book > *{max-width:720px;margin-left:auto;margin-right:auto}
+.book > h2{font-size:clamp(56px,10vw,84px);margin-bottom:28px}
+.step{background:var(--white);border:2px solid var(--black);border-radius:20px;padding:22px;margin-bottom:14px;transition:opacity .3s}
+.step.locked{opacity:.4}
+.step-h{display:flex;align-items:baseline;gap:14px;margin:0 0 18px}
+.step-h b{font:800 40px/.8 var(--display);min-width:22px}
+.step-h h3{font:700 19px/1.2 var(--sans)}
+.step-h .sel{margin-left:auto;color:var(--steel);font-size:15px}
+.durs{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.durs button{border:2px solid var(--rule);background:var(--white);border-radius:14px;padding:16px 12px 14px;cursor:pointer;text-align:left;color:var(--black);transition:border-color .15s,background .15s}
+.durs button b{display:block;font:800 46px/.85 var(--display)}
+.durs button span{font-size:14px;color:var(--steel)}
+.durs button:hover{border-color:var(--red)}
+.durs button.on{background:var(--red);border-color:var(--red);color:#fff}
+.durs button.on span{color:#ffe0e1}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.days .wd{font-size:12px;color:var(--steel);text-align:center;padding-bottom:2px;font-weight:600}
+.days button{aspect-ratio:1/1.08;border:0;border-radius:12px;background:var(--gray);color:#b5b5b5;font:800 26px/1 var(--display);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:default;padding:0}
+.days button small{font:500 11px/1 var(--sans);color:inherit}
+.days button.free{background:#fff;color:var(--black);box-shadow:inset 0 0 0 2px var(--rule);cursor:pointer}
+.days button.free:hover{box-shadow:inset 0 0 0 2px var(--red)}
+.days button.on{background:var(--red);color:#fff;box-shadow:none}
+.days button.today small{font-weight:700}
+.days .blank{visibility:hidden}
+.slot-g{margin-bottom:16px}
+.slot-g:last-child{margin-bottom:0}
+.slot-g p{margin:0 0 8px;font-size:14px;color:var(--steel);font-weight:600}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:8px}
+.slots button{min-height:46px;border-radius:10px;border:2px solid var(--rule);background:#fff;color:var(--black);font:600 16px/1 var(--sans);cursor:pointer;font-variant-numeric:tabular-nums}
+.slots button:hover{border-color:var(--red)}
+.slots button.on{background:var(--red);border-color:var(--red);color:#fff}
+.hint{color:var(--steel);font-size:15px;margin:0}
+.tabs{display:inline-flex;background:var(--gray);border-radius:999px;padding:4px;margin-bottom:6px}
+.tabs button{min-height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;color:var(--steel);font:600 15px/1 var(--sans);cursor:pointer}
+.tabs button:hover{color:var(--red)}
+.tabs button.on{background:var(--black);color:#fff}
+.field{display:block;margin-top:14px}
+.field span{display:block;font-size:14px;color:var(--steel);margin-bottom:6px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;font:inherit;font-size:16px;padding:12px 14px;border-radius:10px;border:2px solid var(--rule);background:#fff;color:var(--black);min-height:50px}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--black)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+@media (max-width:520px){.two{grid-template-columns:1fr}}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px;margin-top:16px;color:var(--steel)}
+.check input{width:20px;height:20px;accent-color:var(--red);flex:none;margin-top:1px}
+.check a{color:var(--red)}
+.err{color:var(--bad);font-size:14px;margin:10px 0 0}
+.who{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.who b{font-size:17px}
+.recap{margin-top:20px;padding-top:18px;border-top:2px dashed var(--rule);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.recap p{margin:0;font:700 22px/1.15 var(--sans);letter-spacing:-.01em}
+.recap p small{display:block;font-size:14px;font-weight:500;color:var(--steel);margin-top:4px;letter-spacing:0}
+.done{text-align:center;padding:12px 0}
+.done h3{font-size:60px;margin:6px 0 12px}
+.done p{margin:0 auto 18px;max-width:420px;color:var(--steel)}
+.done .when{font:700 22px/1.2 var(--sans);color:var(--black);margin-bottom:6px}
+.mine h3{font:700 19px/1.2 var(--sans);margin-bottom:6px}
+.mb{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-top:1px solid var(--rule)}
+.mb:first-of-type{border-top:0}
+.badge{font:600 12px/1 var(--sans);padding:6px 10px;border-radius:999px;white-space:nowrap;display:inline-block}
+.b-ok{background:var(--ok-bg);color:var(--ok)}.b-warn{background:var(--warn-bg);color:var(--warn)}.b-bad{background:var(--bad-bg);color:var(--bad)}.b-muted{background:var(--gray);color:var(--steel)}
+
+/* mobil: alsó sáv a kiválasztással */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--black);color:#fff;padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:none;align-items:center;gap:12px;transform:translateY(110%);transition:transform .35s var(--ease)}
+.bar.show{transform:none}
+.bar p{margin:0;flex:1;font-size:14px;line-height:1.3;min-width:0;color:var(--soft)}
+.bar p b{display:block;font-size:16px;color:#fff}
+.bar .btn{min-height:46px;padding:0 20px}
+@media (max-width:760px){.bar{display:flex}}
+
+/* ---------- névjegy (fekete) ---------- */
+.info{background:var(--black);color:#fff}
+.info-in{max-width:1100px;margin:0 auto;padding:72px 20px;display:grid;grid-template-columns:1fr 1fr;gap:48px}
+@media (max-width:760px){.info-in{grid-template-columns:1fr;gap:36px}}
+.info h2{font-size:56px;margin-bottom:22px}
+.hours{width:100%;border-collapse:collapse;font-size:17px}
+.hours td{padding:11px 0;border-bottom:1px solid var(--black-3);color:var(--soft)}
+.hours td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.hours tr.today td{color:#fff;font-weight:700}
+.contact a{display:block;text-decoration:none;font-size:20px;font-weight:600;padding:12px 0;border-bottom:1px solid var(--black-3)}
+.contact a span{display:block;font-size:13px;font-weight:500;color:var(--soft);margin-bottom:2px}
+.contact a:hover{color:var(--red-2)}
+footer{background:var(--black);color:var(--soft);font-size:14px;border-top:1px solid var(--black-3)}
+footer div{max-width:1100px;margin:0 auto;padding:22px 20px calc(22px + env(safe-area-inset-bottom));display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+footer a{color:var(--red-2)}
+@media (max-width:760px){footer div{padding-bottom:96px}}
+
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,16px);background:var(--black);color:#fff;padding:12px 18px;border-radius:12px;font-size:15px;opacity:0;transition:all .3s var(--ease);pointer-events:none;z-index:100;max-width:90%;border:1px solid var(--black-3)}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media (max-width:760px){#toast{bottom:96px}}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}

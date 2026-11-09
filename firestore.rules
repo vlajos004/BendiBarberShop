@@ -1,0 +1,95 @@
+rules_version = '2';
+// Bendi Időpontfoglalás – adatbázis-szabályok.
+// Nyilvános: a beállítások és a foglaltsági sávok (név és elérhetőség nélkül).
+// Vendég: csak a saját adatait és foglalásait látja, csak a sajátját mondhatja le.
+// Admin: akinek az azonosítója szerepel az "admins" gyűjteményben (kézzel kell felvenni a konzolban).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    function isBanned() { return exists(/databases/$(database)/documents/banned/$(request.auth.uid)); }
+    function onlyChanged(keys) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys); }
+    function bookingAfter(id) { return getAfter(/databases/$(database)/documents/bookings/$(id)).data; }
+    function approvalOff() { return get(/databases/$(database)/documents/settings/public).data.requireApproval == false; }
+
+    match /admins/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow list, write: if false;
+    }
+
+    match /banned/{uid} {
+      allow read, write: if isAdmin();
+    }
+
+    match /settings/public {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /settings/private {
+      allow read, write: if isAdmin();
+    }
+
+    match /users/{uid} {
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['name', 'email', 'phone', 'created'])
+        && request.resource.data.name is string && request.resource.data.name.size() > 1 && request.resource.data.name.size() <= 80
+        && request.resource.data.phone is string && request.resource.data.phone.size() <= 30;
+      allow delete: if isAdmin();
+    }
+
+    match /bookings/{id} {
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+
+      allow create: if isAdmin() || (
+        signedIn() && !isBanned()
+        && request.resource.data.keys().hasOnly(['uid', 'name', 'email', 'phone', 'serviceId', 'serviceName', 'dur',
+             'date', 'start', 'end', 'status', 'guestConfirm', 'token', 'notified', 'reminded', 'decisionMailed', 'created'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
+        && (request.resource.data.status == 'pending' || (request.resource.data.status == 'accepted' && approvalOff()))
+        && request.resource.data.guestConfirm == null
+        && request.resource.data.notified == false
+        && request.resource.data.reminded == false
+        && request.resource.data.decisionMailed == false
+        && request.resource.data.token is string && request.resource.data.token.size() >= 20
+        && request.resource.data.dur is int && request.resource.data.dur > 0 && request.resource.data.dur <= 240
+        && request.resource.data.date is string && request.resource.data.date.size() == 10
+        && request.resource.data.created == request.time
+      );
+
+      allow update: if isAdmin()
+        // a vendég lemondhatja a saját foglalását
+        || (signedIn() && resource.data.uid == request.auth.uid
+            && resource.data.status in ['pending', 'accepted']
+            && request.resource.data.status == 'cancelled' && request.resource.data.cancelledBy == 'guest'
+            && onlyChanged(['status', 'cancelledBy']))
+        // e-mailes link: bejelentkezés nélkül, a titkos tokennel
+        || (resource.data.status == 'accepted' && resource.data.guestConfirm != 'no'
+            && request.resource.data.confirmToken == resource.data.token
+            && request.resource.data.guestConfirm in ['yes', 'no']
+            && onlyChanged(['guestConfirm', 'confirmToken']));
+
+      allow delete: if isAdmin();
+    }
+
+    // Foglaltsági sávok: a naptár ebből látja, mi foglalt. Személyes adat nincs benne.
+    match /busy/{id} {
+      allow read: if true;
+      allow create: if isAdmin() || (
+        signedIn()
+        && request.resource.data.keys().hasOnly(['date', 'start', 'end', 'kind'])
+        && request.resource.data.kind == 'booking'
+        && bookingAfter(id).uid == request.auth.uid
+        && request.resource.data.date == bookingAfter(id).date
+        && request.resource.data.start == bookingAfter(id).start
+        && request.resource.data.end == bookingAfter(id).end
+      );
+      allow update: if isAdmin();
+      allow delete: if isAdmin()
+        || (signedIn() && bookingAfter(id).uid == request.auth.uid && bookingAfter(id).status == 'cancelled')
+        || bookingAfter(id).guestConfirm == 'no';
+    }
+  }
+}
