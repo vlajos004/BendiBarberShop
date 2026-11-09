@@ -230,7 +230,7 @@ function vSet(){
     <label class="switch"><span><b>Megerősítés kérése e-mailben</b><br><span class="muted">Az előző napi emlékeztetőben a vendég egy linkkel megerősíti vagy lemondja az időpontot.</span></span><input type="checkbox" name="reminderConfirm" ${Q.reminderConfirm !== false ? 'checked' : ''}></label>
     <label class="field"><span>Értesítési e-mail-cím (ide jönnek az új foglalások)</span><input name="notifyEmail" type="email" value="${esc(Q.notifyEmail)}"></label>
   </div>
-  <div class="card"><h3>Emlékeztető e-mail</h3><p class="muted">Előző nap 16:00 után automatikusan megy ki minden elfogadott foglaláshoz, a naptárban pedig kézzel is elküldheted. Helyettesítők: {nev}, {mikor} (ma / holnap / dátum), {datum}, {ido}, {idotartam}, {link}. Ha a megerősítés ki van kapcsolva, a {link}-et tartalmazó sor kimarad.</p>
+  <div class="card"><h3>Emlékeztető e-mail</h3><p class="muted">Előző nap 16:00 után automatikusan megy ki minden elfogadott foglaláshoz, a naptárban pedig kézzel is elküldheted. Helyettesítők: {nev}, {mikor} („holnap (november 10., kedd)” vagy a dátum; {Mikor} nagy kezdőbetűvel a tárgy elejére), {datum}, {ido}, {idotartam}, {link}. Ne írd be fixen, hogy „holnap”, mert a kézzel küldött emlékeztető más napra is szólhat. Ha a megerősítés ki van kapcsolva, a {link}-et tartalmazó sor kimarad.</p>
     <label class="field"><span>Tárgy</span><input name="reminderSubject" value="${esc(Q.reminderSubject)}"></label>
     <label class="field"><span>Szöveg</span><textarea name="reminderBody">${esc(Q.reminderBody)}</textarea></label>
     <div class="row"><button type="button" class="btn btn-ghost btn-sm" data-act="preview">Előnézet</button><button type="button" class="btn btn-ghost btn-sm" data-act="tplreset">Alapszöveg visszaállítása</button></div>
@@ -277,9 +277,9 @@ async function saveSettings(e){
 }
 function preview(){
   const f = $('sf'), body = f.elements.reminderBody.value, link = f.elements.reminderConfirm.checked ? 'https://…/confirm.html?…' : null;
-  const vals = { nev: 'Kovács Péter', datum: fmtLong(addDays(today(), 1)), ido: '14:00', idotartam: fmtDur(PUB.durations[0] || 45), mikor: 'holnap', link };
+  const vals = { nev: 'Kovács Péter', datum: fmtLong(addDays(today(), 1)), ido: '14:00', idotartam: fmtDur(PUB.durations[0] || 45), mikor: 'holnap (' + fmtLong(addDays(today(), 1)) + ')', link };
   vals.szolgaltatas = vals.idotartam;
-  const fill = s => s.split('\n').filter(l => link || !l.includes('{link}')).join('\n').replace(/\{(\w+)\}/g, (m, k) => vals[k] ?? m);
+  const fill = s => s.split('\n').filter(l => link || !l.includes('{link}')).join('\n').replace(/( ?)\{(\w+)\}/g, (m, sp, k) => { const low = k[0].toLowerCase() + k.slice(1); let v = vals[k] ?? vals[low]; if (v == null) return m; v = String(v); if (k !== low) v = v[0].toUpperCase() + v.slice(1); return v === '' ? '' : sp + v; });
   const pv = $('pv'); pv.style.display = 'block'; pv.textContent = 'Tárgy: ' + fill(f.elements.reminderSubject.value) + '\n\n' + fill(body);
 }
 

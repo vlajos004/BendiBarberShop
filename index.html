@@ -214,7 +214,7 @@ async function book(){
     busy = busy.filter(b => b.date !== sel.date).concat(snap.docs.map(d => d.data()));
     if (!slotsFor(sel.date, sel.dur, S, busy).includes(sel.time)) { sending = false; sel.time = null; renderFlow(); toast('Ezt az időpontot közben lefoglalták. Válassz másikat.'); return; }
     const ref = doc(collection(db, 'bookings')), end = hhmm(mins(sel.time) + sel.dur);
-    const data = { uid: user.uid, name: profile?.name || user.displayName || '', email: user.email, phone: profile?.phone || '',
+    const data = { uid: user.uid, name: profile?.name || user.displayName || user.email.split('@')[0], email: user.email, phone: profile?.phone || '',
       dur: sel.dur, date: sel.date, start: sel.time, end, status: S.requireApproval === false ? 'accepted' : 'pending',
       guestConfirm: null, token: randToken(), notified: false, reminded: false, decisionMailed: false, created: serverTimestamp() };
     const batch = writeBatch(db);
