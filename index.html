@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 
@@ -54,7 +54,7 @@
 <script type="module">
 import { auth, db, loadPublic, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
   sendPasswordResetEmail, updateProfile, doc, getDoc, setDoc, collection, query, where, getDocs, writeBatch, serverTimestamp,
-  today, parse, addDays, mins, hhmm, fmtLong, fmtShort, fmtDur, esc, WEEKDAYS, randToken, slotsFor, STATUS, CONFIRM, toast, authError, bLabel, ping } from './common.js?v=6';
+  today, parse, addDays, mins, hhmm, fmtLong, fmtShort, fmtDur, esc, WEEKDAYS, randToken, slotsFor, STATUS, CONFIRM, toast, authError, bLabel, ping } from './common.js?v=7';
 
 let S, user = null, profile = null, busy = [], my = [], regProfile = null;
 const sel = { dur: null, date: null, time: null };
@@ -123,7 +123,7 @@ function stepYou(){
       <div class="two"><label class="field"><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label>
       <label class="field"><span>Jelszó</span><input name="password" type="password" autocomplete="${authTab === 'reg' ? 'new-password' : 'current-password'}" minlength="6" required></label></div>
       ${authTab === 'reg' ? `<label class="check"><input type="checkbox" name="consent" required><span>Elolvastam és elfogadom az <a href="adatkezeles.html" target="_blank">adatkezelési tájékoztatót</a>.</span></label>` : ''}
-      <div class="recap" style="margin-top:18px">${authTab === 'login' ? '<button type="button" class="linkish" data-act="reset">Elfelejtett jelszó</button>' : '<span></span>'}
+      <div class="recap" style="margin-top:18px">${authTab === 'login' ? '<button type="button" class="btn btn-line" data-act="reset">Elfelejtett jelszó</button>' : '<span></span>'}
       <button class="btn btn-red" type="submit">${authTab === 'reg' ? 'Regisztrálok' : 'Belépek'}</button></div>
       <p class="err" id="auth-err"></p></form>`;
   }
@@ -257,7 +257,7 @@ async function onAuth(e){
       await updateProfile(cred.user, { displayName: regProfile.name });
       profile = regProfile; renderFlow(); renderAcct(); toast('Regisztráltál, be vagy jelentkezve.');
     } else await signInWithEmailAndPassword(auth, f.email.trim(), f.password);
-  } catch (x) { err.textContent = x.msg || authError(x); }
+  } catch (x) { regProfile = null; err.textContent = x.msg || authError(x); }
 }
 
 /* ---------- események ---------- */
@@ -289,7 +289,8 @@ try { await loadBusy(); } catch (e) { console.error(e); }
 renderFlow(); renderStatus();
 onAuthStateChanged(auth, async u => {
   user = u; profile = null;
-  if (u) { try { const p = await getDoc(doc(db, 'users', u.uid)); profile = p.exists() ? p.data() : (regProfile || { name: u.displayName, phone: '' }); } catch (e) { console.error(e); } }
+  if (u) { try { const p = await getDoc(doc(db, 'users', u.uid)); // a regisztrációs űrlap adatait csak ugyanahhoz a címhez használjuk (sikertelen regisztráció után ne ragadjon rá más fiókra)
+    profile = p.exists() ? p.data() : (regProfile && regProfile.email === u.email ? regProfile : { name: u.displayName, phone: '' }); } catch (e) { console.error(e); } }
   try { await loadMine(); } catch (e) { console.error(e); }
   renderFlow(); renderAcct();
 });

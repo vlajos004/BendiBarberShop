@@ -1,4 +1,4 @@
-import { firebaseConfig, PING_URL } from './config.js?v=6';
+import { firebaseConfig, PING_URL } from './config.js?v=7';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -94,8 +94,9 @@ export function authError(e){
   const m = {
     'auth/email-already-in-use': 'Ezzel az e-mail-címmel már regisztráltak. Lépj be, vagy kérj új jelszót.',
     'auth/invalid-credential': 'Hibás e-mail-cím vagy jelszó.',
-    'auth/wrong-password': 'Hibás e-mail-cím vagy jelszó.',
-    'auth/user-not-found': 'Hibás e-mail-cím vagy jelszó.',
+    // ezek csak akkor jönnek, ha a Firebase-ben ki van kapcsolva az „Email enumeration protection”; különben invalid-credential
+    'auth/wrong-password': 'Hibás jelszó. Próbáld újra, vagy kérj új jelszót.',
+    'auth/user-not-found': 'Ezzel az e-mail-címmel még nem regisztráltak. Válts a Regisztráció fülre.',
     'auth/weak-password': 'A jelszó legalább 6 karakter legyen.',
     'auth/invalid-email': 'Érvénytelen e-mail-cím.',
     'auth/too-many-requests': 'Túl sok próbálkozás. Várj pár percet.',

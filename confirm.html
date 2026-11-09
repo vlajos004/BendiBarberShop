@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=7">
 <style>
 body{background:var(--ink);color:var(--cream);min-height:100svh;display:grid;place-items:center;padding:20px}
 .box{max-width:440px;width:100%;text-align:center}
@@ -25,7 +25,7 @@ p{color:var(--fg-2)}
 <body>
 <div class="box" id="box"><a class="logo" href="index.html"><i>BENDI</i><span>Időpontfoglalás</span></a><p>Betöltés…</p></div>
 <script type="module">
-import { db, doc, writeBatch, fmtLong, esc, ping } from './common.js?v=6';
+import { db, doc, writeBatch, fmtLong, esc, ping } from './common.js?v=7';
 const q = new URLSearchParams(location.search), id = q.get('b'), token = q.get('t'), date = q.get('d'), start = q.get('s');
 const box = document.getElementById('box'), head = box.firstElementChild.outerHTML;
 const valid = id && token && /^\d{4}-\d{2}-\d{2}$/.test(date || '') && /^\d{2}:\d{2}$/.test(start || '');
