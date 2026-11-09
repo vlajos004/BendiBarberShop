@@ -1,10 +1,9 @@
-// A Firebase konzolból (Projektbeállítások → Saját alkalmazások → Webalkalmazás) másold ide a saját értékeidet.
-// Ezek nyilvánosak, nem titkosak: az adatokat az adatbázis-szabályok (firestore.rules) védik.
+// Firebase-projekt: bendi-weblap. Ezek nyilvános adatok, a védelmet a firestore.rules adja.
 export const firebaseConfig = {
-  apiKey: "IDE_JON_AZ_API_KEY",
-  authDomain: "PROJEKT-ID.firebaseapp.com",
-  projectId: "PROJEKT-ID",
-  storageBucket: "PROJEKT-ID.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:0000000000000000"
+  apiKey: "AIzaSyBu8LvqvuHlaq3pNIcYhDKawq4YaIevhGQ",
+  authDomain: "bendi-weblap.firebaseapp.com",
+  projectId: "bendi-weblap",
+  storageBucket: "bendi-weblap.firebasestorage.app",
+  messagingSenderId: "177464565257",
+  appId: "1:177464565257:web:d70cf3602b1699a9f322d8"
 };

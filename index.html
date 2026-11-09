@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bendi Időpontfoglalás</title>
+<meta name="description" content="Foglalj időpontot Bendihez online.">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23000'/%3E%3Ctext x='32' y='44' font-family='Arial Narrow,Arial' font-weight='900' font-size='38' text-anchor='middle' fill='%23fff'%3EB%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="brand" href="#">Bendi<span>Időpontfoglalás</span></a>
+  <div class="top-links"><a href="#elerhetoseg">Névjegy</a><span id="acct"></span></div>
+</nav>
+
+<header class="hero">
+  <div>
+    <h1>Foglalj időpontot Bendihez.</h1>
+    <p>Válaszd ki, mennyi időre jössz, aztán a napot és az órát. Előző nap délután e-mailben emlékeztetünk.</p>
+    <a class="btn btn-red btn-lg" href="#foglalas">Időpontot foglalok</a>
+  </div>
+  <div class="status" aria-live="polite">
+    <div class="status-h"><i id="st-dot"></i><span id="st-head">betöltés…</span></div>
+    <dl id="st-list"></dl>
+  </div>
+</header>
+
+<main class="book" id="foglalas">
+  <h2>Foglalás</h2>
+  <div id="flow"></div>
+  <div class="step mine" id="mine" hidden></div>
+</main>
+
+<section class="info" id="elerhetoseg">
+  <div class="info-in">
+    <div><h2>Nyitvatartás</h2><table class="hours" id="hours"></table></div>
+    <div><h2>Elérhetőség</h2><div class="contact" id="contact"></div></div>
+  </div>
+</section>
+<footer><div><span>Bendi Időpontfoglalás</span><span><a href="adatkezeles.html">Adatkezelési tájékoztató</a> &nbsp; <a href="admin.html">Bendi belépés</a></span></div></footer>
+
+<div class="bar" id="bar" aria-live="polite"></div>
+
+<script type="module">
+import { auth, db, loadPublic, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
+  sendPasswordResetEmail, updateProfile, doc, getDoc, setDoc, collection, query, where, getDocs, writeBatch, serverTimestamp,
+  today, parse, addDays, mins, hhmm, fmtLong, fmtShort, fmtDur, esc, WEEKDAYS, randToken, slotsFor, STATUS, CONFIRM, toast, authError, bLabel } from './common.js';
+
+let S, user = null, profile = null, busy = [], my = [], regProfile = null;
+const sel = { dur: null, date: null, time: null };
+let authTab = 'login', done = null, sending = false;
+const $ = id => document.getElementById(id);
+const maxActive = () => S.maxActive || 2;
+// shortcut: a darabszám-korlátot a böngésző ellenőrzi; aki ezt megkerüli, azt Bendi jóváhagyása és a tiltás szűri ki
+const activeCount = () => my.filter(b => ['pending', 'accepted'].includes(b.status) && b.guestConfirm !== 'no').length;
+const cap = s => s.replace(/^./, c => c.toUpperCase());
+
+/* ---------- adatok ---------- */
+async function loadBusy(){
+  const t = today();
+  const snap = await getDocs(query(collection(db, 'busy'), where('date', '>=', t), where('date', '<=', addDays(t, S.horizonDays))));
+  busy = snap.docs.map(d => d.data());
+}
+async function loadMine(){
+  if (!user) { my = []; return; }
+  const snap = await getDocs(query(collection(db, 'bookings'), where('uid', '==', user.uid)));
+  my = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(b => b.date >= today()).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+}
+
+/* ---------- lépések ---------- */
+function stepDur(){
+  return `<section class="step"><div class="step-h"><b>1/4</b><h3>Mennyi időre jössz?</h3></div>
+    <div class="durs">${S.durations.map(d => { const t = fmtDur(d).split(' ');
+      return `<button class="${sel.dur === d ? 'on' : ''}" data-dur="${d}" aria-pressed="${sel.dur === d}"><b>${t[0]}</b><span>${t.slice(1).join(' ')}</span></button>`; }).join('')}</div></section>`;
+}
+function stepDay(){
+  const t = today(), last = addDays(t, S.horizonDays), wd0 = (parse(t).getDay() + 6) % 7;
+  let h = `<section class="step ${sel.dur ? '' : 'locked'}"><div class="step-h"><b>2/4</b><h3>Melyik napon?</h3></div><div class="days">`;
+  h += ['H', 'K', 'Sze', 'Cs', 'P', 'Szo', 'V'].map(w => `<div class="wd">${w}</div>`).join('');
+  for (let i = 0; i < wd0; i++) h += '<button class="blank" disabled tabindex="-1" aria-hidden="true"></button>';
+  for (let d = t; d <= last; d = addDays(d, 1)){
+    const free = sel.dur && slotsFor(d, sel.dur, S, busy).length > 0, p = parse(d);
+    const small = d === t ? 'ma' : p.getDate() === 1 ? p.toLocaleDateString('hu-HU', { month: 'short' }).replace('.', '') : '&nbsp;';
+    h += `<button class="${free ? 'free' : ''} ${sel.date === d ? 'on' : ''} ${d === t ? 'today' : ''}" ${free ? `data-day="${d}"` : 'disabled'} aria-label="${fmtLong(d)}${free ? '' : ', nincs szabad időpont'}">${p.getDate()}<small>${small}</small></button>`;
+  }
+  return h + `</div>${sel.dur ? '' : '<p class="hint" style="margin-top:12px">Előbb válaszd ki, mennyi időre jössz.</p>'}</section>`;
+}
+function stepTime(){
+  let body;
+  if (!sel.dur || !sel.date) body = `<p class="hint">${sel.dur ? 'Válassz egy napot.' : 'Előbb válassz időtartamot és napot.'}</p>`;
+  else {
+    const l = slotsFor(sel.date, sel.dur, S, busy);
+    const g = [['Délelőtt', l.filter(x => mins(x) < 720)], ['Délután', l.filter(x => mins(x) >= 720)]].filter(x => x[1].length);
+    body = l.length ? g.map(([n, xs]) => `<div class="slot-g"><p>${n}</p><div class="slots">${xs.map(x => `<button class="${sel.time === x ? 'on' : ''}" data-time="${x}" aria-pressed="${sel.time === x}">${x}</button>`).join('')}</div></div>`).join('')
+      : '<p class="hint">Erre a napra már nincs szabad időpont.</p>';
+  }
+  return `<section class="step ${sel.dur && sel.date ? '' : 'locked'}" id="st-time"><div class="step-h"><b>3/4</b><h3>Hánykor?</h3>${sel.date ? `<span class="sel">${esc(fmtShort(sel.date))}</span>` : ''}</div>${body}</section>`;
+}
+function stepYou(){
+  const ready = sel.dur && sel.date && sel.time;
+  let h = `<section class="step" id="st-you"><div class="step-h"><b>4/4</b><h3>${user ? 'Foglalás elküldése' : 'Lépj be, vagy regisztrálj'}</h3></div>`;
+  if (user) {
+    const full = activeCount() >= maxActive();
+    h += `<div class="who"><span>Bejelentkezve: <b>${esc(profile?.name || user.email)}</b></span><button class="linkish" data-act="logout">Kilépés</button></div>
+      ${full ? `<p class="err">Egyszerre legfeljebb ${maxActive()} jövőbeli foglalásod lehet. Újhoz előbb mondd le az egyiket lent.</p>` : ''}
+      <div class="recap"><p>${ready ? esc(cap(fmtLong(sel.date)) + ', ' + sel.time) : 'Még nincs kiválasztott időpont'}<small>${sel.dur ? fmtDur(sel.dur) : ''}</small></p>
+      <button class="btn btn-red" data-act="book" ${ready && !sending && !full ? '' : 'disabled'}>${sending ? 'Küldés…' : 'Foglalás elküldése'}</button></div><p class="err" id="bk-err"></p>`;
+  } else {
+    h += `<div class="tabs" role="tablist"><button role="tab" class="${authTab === 'login' ? 'on' : ''}" data-tab="login">Belépés</button><button role="tab" class="${authTab === 'reg' ? 'on' : ''}" data-tab="reg">Regisztráció</button></div>
+      <form id="auth-form" novalidate>
+      ${authTab === 'reg' ? `<div class="two"><label class="field"><span>Teljes név</span><input name="name" autocomplete="name" required></label>
+      <label class="field"><span>Telefonszám</span><input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+36 30 123 4567" required></label></div>` : ''}
+      <div class="two"><label class="field"><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label>
+      <label class="field"><span>Jelszó</span><input name="password" type="password" autocomplete="${authTab === 'reg' ? 'new-password' : 'current-password'}" minlength="6" required></label></div>
+      ${authTab === 'reg' ? `<label class="check"><input type="checkbox" name="consent" required><span>Elolvastam és elfogadom az <a href="adatkezeles.html" target="_blank">adatkezelési tájékoztatót</a>.</span></label>` : ''}
+      <div class="recap" style="margin-top:18px">${authTab === 'login' ? '<button type="button" class="linkish" data-act="reset">Elfelejtett jelszó</button>' : '<span></span>'}
+      <button class="btn btn-red" type="submit">${authTab === 'reg' ? 'Regisztrálok' : 'Belépek'}</button></div>
+      <p class="err" id="auth-err"></p></form>`;
+  }
+  return h + '</section>';
+}
+function renderFlow(){
+  if (done) {
+    $('flow').innerHTML = `<section class="step done"><div class="tick" aria-hidden="true">✓</div><h3>${done.status === 'pending' ? 'Elküldve' : 'Lefoglalva'}</h3>
+      <p class="when">${esc(cap(fmtLong(done.date)))}, ${done.start}</p>
+      <p>${done.status === 'pending' ? 'Bendi hamarosan jóváhagyja a foglalásodat, erről e-mailt kapsz.' : 'Az időpont a tiéd.'} Előző nap délután küldünk egy emlékeztetőt.</p>
+      <button class="btn btn-line" data-act="again">Új foglalás</button></section>`;
+  } else $('flow').innerHTML = stepDur() + stepDay() + stepTime() + stepYou();
+  renderMine(); renderBar();
+}
+function renderMine(){
+  const el = $('mine');
+  if (!user || !my.length) { el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = `<h3>Foglalásaid</h3>` + my.map(b => {
+    const st = b.status === 'accepted' && b.guestConfirm && CONFIRM[b.guestConfirm] ? CONFIRM[b.guestConfirm] : STATUS[b.status] || ['', 'muted'];
+    const can = ['pending', 'accepted'].includes(b.status) && b.guestConfirm !== 'no';
+    return `<div class="mb"><div><b>${esc(fmtShort(b.date))}, ${esc(b.start)}</b><br><span class="hint">${esc(bLabel(b))}</span></div>
+      <div style="text-align:right"><span class="badge b-${st[1]}">${st[0]}</span>${can ? `<br><button class="linkish" data-cancel="${b.id}" style="margin-top:8px">Lemondom</button>` : ''}</div></div>`;
+  }).join('');
+}
+function renderBar(){
+  const bar = $('bar'), ready = sel.dur && sel.date && sel.time && !done;
+  bar.classList.toggle('show', !!ready);
+  if (ready) bar.innerHTML = `<p><b>${esc(fmtShort(sel.date))}, ${sel.time}</b>${fmtDur(sel.dur)}</p><button class="btn btn-red" data-act="${user ? 'book' : 'tologin'}" ${sending ? 'disabled' : ''}>${user ? 'Foglalás elküldése' : 'Tovább'}</button>`;
+}
+function renderInfo(){
+  const wd = new Date().getDay();
+  $('hours').innerHTML = [1,2,3,4,5,6,0].map(d => { const h = S.hours[String(d)]; return `<tr class="${d === wd ? 'today' : ''}"><td>${WEEKDAYS[d]}${d === wd ? ' (ma)' : ''}</td><td>${h ? h[0] + '–' + h[1] : 'Zárva'}</td></tr>`; }).join('');
+  const maps = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(S.address || '');
+  $('contact').innerHTML = `${S.address ? `<a href="${maps}" target="_blank" rel="noopener"><span>Cím, térképen</span>${esc(S.address)}</a>` : ''}
+    ${S.phone ? `<a href="tel:${esc(S.phone.replace(/\s/g, ''))}"><span>Telefon</span>${esc(S.phone)}</a>` : ''}
+    ${S.publicEmail ? `<a href="mailto:${esc(S.publicEmail)}"><span>E-mail</span>${esc(S.publicEmail)}</a>` : ''}
+    ${S.instagram ? `<a href="https://instagram.com/${esc(S.instagram.replace('@', ''))}" target="_blank" rel="noopener"><span>Instagram</span>@${esc(S.instagram.replace('@', ''))}</a>` : ''}`;
+}
+function renderStatus(){
+  const now = new Date(), t = today(), h = S.hours[String(now.getDay())], m = now.getHours() * 60 + now.getMinutes();
+  const open = h && m >= mins(h[0]) && m < mins(h[1]);
+  let next = null; const dur = Math.min(...S.durations);
+  for (let d = t; d <= addDays(t, S.horizonDays) && !next; d = addDays(d, 1)) { const l = slotsFor(d, dur, S, busy); if (l.length) next = [d, l[0]]; }
+  $('st-dot').className = open ? 'open' : '';
+  $('st-head').textContent = open ? `nyitva, ${h[1]}-ig` : 'most zárva';
+  $('st-list').innerHTML = `<dt>ma</dt><dd>${h ? h[0] + '–' + h[1] : 'zárva'}</dd>
+    <dt>legközelebb szabad</dt><dd>${next ? esc(dayLabelShort(next[0])) + ', ' + next[1] : 'nincs a következő ' + S.horizonDays + ' napban'}</dd>
+    <dt>időtartamok</dt><dd>${S.durations.join(', ')} perc</dd>
+    <dt>előre foglalható</dt><dd>${S.horizonDays} nap</dd>`;
+}
+const dayLabelShort = d => d === today() ? 'ma' : d === addDays(today(), 1) ? 'holnap' : fmtShort(d);
+function renderAcct(){ $('acct').innerHTML = user ? `<a class="top-btn" href="#foglalas" title="Bejelentkezve">${esc((profile?.name || user.email).split(' ').pop())}</a>` : `<a class="top-btn" href="#foglalas" data-act="tologin">Belépés</a>`; }
+
+/* ---------- műveletek ---------- */
+async function book(){
+  if (!sel.dur || !sel.date || !sel.time || sending) return;
+  sending = true; renderFlow();
+  try {
+    await loadMine();
+    if (activeCount() >= maxActive()) { sending = false; renderFlow(); toast(`Egyszerre legfeljebb ${maxActive()} jövőbeli foglalásod lehet.`); return; }
+    // frissen lekérjük a napot, hátha közben valaki elvitte
+    const snap = await getDocs(query(collection(db, 'busy'), where('date', '==', sel.date)));
+    busy = busy.filter(b => b.date !== sel.date).concat(snap.docs.map(d => d.data()));
+    if (!slotsFor(sel.date, sel.dur, S, busy).includes(sel.time)) { sending = false; sel.time = null; renderFlow(); toast('Ezt az időpontot közben lefoglalták. Válassz másikat.'); return; }
+    const ref = doc(collection(db, 'bookings')), end = hhmm(mins(sel.time) + sel.dur);
+    const data = { uid: user.uid, name: profile?.name || user.displayName || '', email: user.email, phone: profile?.phone || '',
+      dur: sel.dur, date: sel.date, start: sel.time, end, status: S.requireApproval === false ? 'accepted' : 'pending',
+      guestConfirm: null, token: randToken(), notified: false, reminded: false, decisionMailed: false, created: serverTimestamp() };
+    const batch = writeBatch(db);
+    batch.set(ref, data);
+    batch.set(doc(db, 'busy', ref.id), { date: sel.date, start: sel.time, end, kind: 'booking' });
+    await batch.commit();
+    busy.push({ date: sel.date, start: sel.time, end, kind: 'booking' }); renderStatus();
+    done = data; sel.date = sel.time = null;
+    await loadMine();
+    sending = false; renderFlow(); $('foglalas').scrollIntoView({ behavior: 'smooth' });
+  } catch (e) {
+    console.error(e); sending = false; renderFlow();
+    const err = $('bk-err'); if (err) err.textContent = e.code === 'permission-denied' ? 'A foglalás nem sikerült. Ha újra előfordul, hívd fel Bendit.' : 'A foglalás nem sikerült. Ellenőrizd az internetkapcsolatot, és próbáld újra.';
+  }
+}
+async function cancelBooking(id){
+  const b = my.find(x => x.id === id); if (!b || !confirm(`Lemondod ezt az időpontot: ${fmtLong(b.date)}, ${b.start}?`)) return;
+  try {
+    const batch = writeBatch(db);
+    batch.update(doc(db, 'bookings', id), { status: 'cancelled', cancelledBy: 'guest' });
+    batch.delete(doc(db, 'busy', id));
+    await batch.commit();
+    busy = busy.filter(x => !(x.date === b.date && x.start === b.start));
+    await loadMine(); renderFlow(); toast('Lemondtad az időpontot.');
+  } catch (e) { console.error(e); toast('A lemondás nem sikerült. Hívd fel Bendit.'); }
+}
+async function onAuth(e){
+  e.preventDefault();
+  const f = Object.fromEntries(new FormData(e.target)), err = $('auth-err'); err.textContent = '';
+  try {
+    if (authTab === 'reg') {
+      if (!f.name || f.name.trim().length < 2) throw { msg: 'Add meg a teljes neved.' };
+      if (!/^[+\d][\d\s\-()]{7,}$/.test((f.phone || '').trim())) throw { msg: 'Adj meg egy érvényes telefonszámot.' };
+      if (!f.consent) throw { msg: 'A regisztrációhoz fogadd el az adatkezelési tájékoztatót.' };
+      // a profilt előre eltesszük, mert a belépés eseménye hamarabb lefuthat, mint ahogy elmentjük
+      regProfile = { name: f.name.trim(), email: f.email.trim().toLowerCase(), phone: f.phone.trim() };
+      const cred = await createUserWithEmailAndPassword(auth, f.email.trim(), f.password);
+      regProfile.email = cred.user.email;
+      await setDoc(doc(db, 'users', cred.user.uid), { ...regProfile, created: serverTimestamp() });
+      await updateProfile(cred.user, { displayName: regProfile.name });
+      profile = regProfile; renderFlow(); renderAcct(); toast('Regisztráltál, be vagy jelentkezve.');
+    } else await signInWithEmailAndPassword(auth, f.email.trim(), f.password);
+  } catch (x) { err.textContent = x.msg || authError(x); }
+}
+
+/* ---------- események ---------- */
+document.addEventListener('click', async e => {
+  const t = e.target.closest('[data-dur],[data-day],[data-time],[data-tab],[data-act],[data-cancel]'); if (!t) return;
+  const d = t.dataset;
+  if (d.dur) { sel.dur = Number(d.dur); sel.time = null; if (sel.date && !slotsFor(sel.date, sel.dur, S, busy).length) sel.date = null; done = null; renderFlow(); }
+  else if (d.day) { sel.date = d.day; sel.time = null; renderFlow(); $('st-time').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+  else if (d.time) { sel.time = d.time; renderFlow(); if (innerWidth > 760) $('st-you').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+  else if (d.tab) { authTab = d.tab; renderFlow(); }
+  else if (d.cancel) cancelBooking(d.cancel);
+  else if (d.act === 'book') book();
+  else if (d.act === 'tologin') { e.preventDefault(); $('st-you').scrollIntoView({ behavior: 'smooth' }); }
+  else if (d.act === 'logout') signOut(auth);
+  else if (d.act === 'again') { done = null; renderFlow(); }
+  else if (d.act === 'reset') {
+    const em = document.querySelector('#auth-form [name=email]').value.trim();
+    if (!em) { $('auth-err').textContent = 'Írd be az e-mail-címed, és kattints újra.'; return; }
+    try { await sendPasswordResetEmail(auth, em); toast('Elküldtük a jelszó-visszaállító e-mailt.'); } catch (x) { $('auth-err').textContent = authError(x); }
+  }
+});
+document.addEventListener('submit', e => { if (e.target.id === 'auth-form') onAuth(e); });
+
+/* ---------- indulás ---------- */
+S = await loadPublic();
+if (!Array.isArray(S.durations) || !S.durations.length) S.durations = [30, 45, 60, 90];
+renderInfo(); renderFlow(); renderAcct();
+try { await loadBusy(); } catch (e) { console.error(e); }
+renderFlow(); renderStatus();
+onAuthStateChanged(auth, async u => {
+  user = u; profile = null;
+  if (u) { try { const p = await getDoc(doc(db, 'users', u.uid)); profile = p.exists() ? p.data() : (regProfile || { name: u.displayName, phone: '' }); } catch (e) { console.error(e); } }
+  try { await loadMine(); } catch (e) { console.error(e); }
+  renderFlow(); renderAcct();
+});
+</script>
+</body>
+</html>
