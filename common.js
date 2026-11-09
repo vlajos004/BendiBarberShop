@@ -1,4 +1,4 @@
-import { firebaseConfig } from './config.js?v=5';
+import { firebaseConfig, PING_URL } from './config.js?v=6';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -80,6 +80,9 @@ export const STATUS = {
   pending: ['Jóváhagyásra vár', 'warn'], accepted: ['Elfogadva', 'ok'], rejected: ['Elutasítva', 'bad'], cancelled: ['Lemondva', 'muted']
 };
 export const CONFIRM = { yes: ['Visszaigazolta', 'ok'], no: ['Lemondta (linkkel)', 'bad'] };
+
+// Szól az e-mail-szkriptnek, hogy most fusson le (a válasz nem érdekes, ezért no-cors).
+export function ping(){ if (PING_URL) fetch(PING_URL, { mode: 'no-cors' }).catch(() => {}); }
 
 export function toast(msg){
   let t = document.getElementById('toast');
