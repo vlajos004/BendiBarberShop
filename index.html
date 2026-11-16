@@ -12,7 +12,7 @@
 <link rel="preload" href="bricolage-grotesque-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="manrope-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <script>if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('js');</script>
-<link rel="stylesheet" href="site.css?v=8">
+<link rel="stylesheet" href="site.css?v=9">
 </head>
 <body>
 <div class="progress" id="progress" aria-hidden="true"></div>
@@ -41,10 +41,6 @@
           <a class="btn btn-line" href="#munkak" id="cta-munkak" hidden>Munkáim</a>
         </div>
       </div>
-      <div class="panel" aria-live="polite">
-        <div class="panel-head"><strong>Bendi ma</strong><span class="state"><i id="st-dot"></i><span id="st-head">betöltés…</span></span></div>
-        <div id="st-list"></div>
-      </div>
     </div>
   </section>
 
@@ -56,16 +52,17 @@
   </section>
 
   <section class="block" id="foglalas">
-    <div class="wrap">
-      <div class="section-head" data-reveal><span class="kicker">Online foglalás</span><h2>Foglalj időpontot</h2><p>Négy lépés, egy perc. A foglalt időpontokat senki más nem tudja lefoglalni.</p></div>
-      <div class="book-grid">
-        <div>
-          <div class="booking" id="flow" data-reveal>
-          </div>
-          <div id="flow-done" hidden></div>
-          <div class="mine" id="mine" hidden></div>
-        </div>
-        <aside class="dayview" id="dayview" aria-label="A kiválasztott nap beosztása" data-reveal="scale"></aside>
+    <div class="wrap demo-grid">
+      <div class="demo-copy" data-reveal>
+        <span class="kicker">Online foglalás</span><h2>Foglalj időpontot</h2>
+        <p class="muted-p">Válaszd ki, mennyi időre jössz, aztán a napot és az órát. Egy perc az egész.</p>
+        <ul class="ticks"><li>a foglalt időpontot senki más nem tudja lefoglalni</li><li>előző nap délután e-mailben emlékeztetünk</li><li>ha közbejön valami, egy kattintással lemondhatod</li></ul>
+        <div class="mine" id="mine" hidden></div>
+      </div>
+      <div class="booking-card" id="booking" data-reveal="scale">
+        <div class="booking-top"><strong>Bendi</strong><span>ONLINE FOGLALÁS</span></div>
+        <div class="booking-body" id="flow"></div>
+        <div id="flow-done" hidden></div>
       </div>
     </div>
   </section>
@@ -87,7 +84,6 @@
 </main>
 <footer><div class="wrap"><span>Bendi Időpontfoglalás</span><span><a href="adatkezeles.html">Adatkezelési tájékoztató</a> &nbsp;·&nbsp; <a href="admin.html">Bendi belépés</a></span></div></footer>
 
-<div class="bar" id="bar" aria-live="polite"></div>
 <dialog class="lb" id="lb" aria-label="Kép nagyban"><div class="lb-in"><img id="lb-img" alt=""><p class="lb-cap" id="lb-cap"></p>
   <button class="lb-btn lb-x" data-lb="x" aria-label="Bezárás">✕</button><button class="lb-btn lb-p" data-lb="-1" aria-label="Előző kép">‹</button><button class="lb-btn lb-n" data-lb="1" aria-label="Következő kép">›</button></div></dialog>
 
@@ -98,7 +94,7 @@ import { auth, db, loadPublic, onAuthStateChanged, signOut, doc, getDoc, collect
 
 let S, user = null, profile = null, busy = [], my = [], regProfile = null, gallery = [];
 const sel = { dur: null, date: null, time: null };
-let authTab = 'login', done = null, sending = false, open = 'dur';
+let authTab = 'login', done = null, sending = false;
 const $ = id => document.getElementById(id);
 const maxActive = () => S.maxActive || 2;
 // shortcut: a darabszám-korlátot a böngésző ellenőrzi; aki ezt megkerüli, azt Bendi jóváhagyása és a tiltás szűri ki
@@ -117,96 +113,127 @@ async function loadMine(){
   my = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(b => b.date >= today()).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
 }
 
-/* ---------- foglalás: lépések harmonikában ---------- */
-function stepDur(){
-  return `<div class="durs">${S.durations.map(d => { const t = fmtDur(d).split(' ');
-    return `<button class="${sel.dur === d ? 'on' : ''}" data-dur="${d}" aria-pressed="${sel.dur === d}"><b>${t[0]}</b><span>${t.slice(1).join(' ')}</span></button>`; }).join('')}</div>`;
+/* ---------- foglalás: a BeállIT-demó mintájára, egy kártyán, minden lépés nyitva ---------- */
+const DN = ['vas', 'hét', 'kedd', 'sze', 'csüt', 'pén', 'szo'];
+const dayShort = d => { const p = parse(d); return p.toLocaleDateString('hu-HU', { month: 'short', day: 'numeric' }); };
+const dayLabel = d => (d === today() ? 'ma' : d === addDays(today(), 1) ? 'holnap' : DN[parse(d).getDay()]) + ', ' + dayShort(d);
+// A nap összes kezdési lehetősége a választott időtartammal; a foglalttal ütközők "taken" jelölést kapnak (áthúzva látszanak).
+function starts(date, dur){
+  const h = S.hours[String(parse(date).getDay())]; if (!h || !dur) return [];
+  const free = new Set(slotsFor(date, dur, S, busy)), o = mins(h[0]), c = mins(h[1]), step = S.slotStep || 15, now = new Date();
+  const earliest = date === today() ? now.getHours() * 60 + now.getMinutes() + (S.minNoticeHours || 0) * 60 : -1;
+  const out = [];
+  for (let t = o; t + dur <= c; t += step) if (t >= earliest) out.push({ t: hhmm(t), taken: !free.has(hhmm(t)) });
+  return out;
 }
+const opt = (attr, html, on, dis, i) => `<button type="button" class="opt ${on ? 'on' : ''}" ${attr} aria-pressed="${!!on}" ${dis ? 'disabled' : ''} style="--i:${i || 0}">${html}</button>`;
+function stepDur(){ return `<div class="opts">${S.durations.map((d, i) => opt(`data-dur="${d}"`, fmtDur(d), sel.dur === d, false, i)).join('')}</div>`; }
 function stepDay(){
-  const t = today(), last = addDays(t, S.horizonDays), wd0 = (parse(t).getDay() + 6) % 7;
-  let h = '<div class="days">' + ['H', 'K', 'Sze', 'Cs', 'P', 'Szo', 'V'].map(w => `<div class="wd">${w}</div>`).join('');
-  for (let i = 0; i < wd0; i++) h += '<button class="blank" disabled tabindex="-1" aria-hidden="true"></button>';
-  for (let d = t; d <= last; d = addDays(d, 1)){
-    const free = sel.dur && slotsFor(d, sel.dur, S, busy).length > 0, p = parse(d);
-    const small = d === t ? 'ma' : p.getDate() === 1 ? p.toLocaleDateString('hu-HU', { month: 'short' }).replace('.', '') : '&nbsp;';
-    h += `<button class="${free ? 'free' : ''} ${sel.date === d ? 'on' : ''} ${d === t ? 'today' : ''}" ${free ? `data-day="${d}"` : 'disabled'} aria-label="${fmtLong(d)}${free ? '' : ', nincs szabad időpont'}">${p.getDate()}<small>${small}</small></button>`;
+  const t = today(), out = [];
+  for (let d = t, i = 0; d <= addDays(t, S.horizonDays); d = addDays(d, 1)) {
+    if (!S.hours[String(parse(d).getDay())]) continue;  // zárva: nem is mutatjuk
+    const free = !sel.dur || slotsFor(d, sel.dur, S, busy).length > 0;
+    out.push(opt(`data-day="${d}"`, `${d === t ? 'ma' : d === addDays(t, 1) ? 'holnap' : DN[parse(d).getDay()]}<small>${dayShort(d)}</small>`, sel.date === d, !free, i++));
   }
-  return h + '</div>';
+  return `<div class="opts">${out.join('')}</div>`;
 }
 function stepTime(){
-  if (!sel.dur || !sel.date) return `<p class="hint">${sel.dur ? 'Válassz egy napot.' : 'Előbb válassz időtartamot és napot.'}</p>`;
-  const l = slotsFor(sel.date, sel.dur, S, busy);
-  const g = [['Délelőtt', l.filter(x => mins(x) < 720)], ['Délután', l.filter(x => mins(x) >= 720)]].filter(x => x[1].length);
-  return l.length ? g.map(([n, xs]) => `<div class="slot-g"><p>${n}</p><div class="slots">${xs.map(x => `<button class="${sel.time === x ? 'on' : ''}" data-time="${x}" aria-pressed="${sel.time === x}">${x}</button>`).join('')}</div></div>`).join('')
-    : '<p class="hint">Erre a napra már nincs szabad időpont.</p>';
+  if (!sel.dur || !sel.date) return `<p class="hint">${sel.dur ? 'Előbb válassz napot.' : 'Előbb válassz időtartamot és napot.'}</p>`;
+  const l = starts(sel.date, sel.dur);
+  const g = [['Délelőtt', l.filter(x => mins(x.t) < 720)], ['Délután', l.filter(x => mins(x.t) >= 720)]].filter(x => x[1].length);
+  return `<div class="dayline" id="dayline"></div>` + (l.some(x => !x.taken)
+    ? g.map(([n, xs]) => `<div class="slot-g"><p>${n}</p><div class="opts">${xs.map((x, i) => opt(`data-time="${x.t}"`, x.t, sel.time === x.t, x.taken, i)).join('')}</div></div>`).join('')
+    : '<p class="hint">Ezen a napon nincs elég hosszú szabad idősáv ehhez az időtartamhoz. Válassz másik napot.</p>');
 }
 function stepYou(){
-  const ready = sel.dur && sel.date && sel.time;
-  if (!user) return authFormHTML(authTab);
-  const full = activeCount() >= maxActive();
-  return `<div class="who"><span>Bejelentkezve: <b>${esc(profile?.name || user.email)}</b></span><button class="linkish" data-act="logout">Kilépés</button></div>
-    ${full ? `<p class="err">Egyszerre legfeljebb ${maxActive()} jövőbeli foglalásod lehet. Újhoz előbb mondd le az egyiket lent.</p>` : ''}
-    <div class="recap"><p>${ready ? esc(cap(fmtLong(sel.date)) + ', ' + sel.time) : 'Még nincs kiválasztott időpont'}<small>${sel.dur ? fmtDur(sel.dur) : ''}</small></p>
-    <button class="btn btn-red" data-act="book" ${ready && !sending && !full ? '' : 'disabled'}>${sending ? 'Küldés…' : 'Foglalás elküldése'}</button></div><p class="err" id="bk-err"></p>`;
+  if (!user) return '<p class="hint" style="margin-bottom:10px">A foglaláshoz lépj be, vagy regisztrálj egyszer. Erre a címre küldjük a visszaigazolást és az emlékeztetőt.</p>' + authFormHTML(authTab);
+  return `<div class="who"><span>Bejelentkezve: <b>${esc(profile?.name || user.email)}</b><br><span class="hint">${esc(user.email)}</span></span><button class="linkish" data-act="logout">Kilépés</button></div>`;
 }
 const STEPS = [
   ['dur', 'Időtartam', () => sel.dur ? fmtDur(sel.dur) : '', stepDur, () => false],
-  ['day', 'Nap', () => sel.date ? cap(fmtShort(sel.date)) : '', stepDay, () => !sel.dur],
-  ['time', 'Időpont', () => sel.time || '', stepTime, () => !sel.date],
-  ['you', 'Foglalás elküldése', () => user ? (profile?.name || user.email) : '', stepYou, () => false]
+  ['day', 'Nap', () => sel.date ? dayLabel(sel.date) : '', stepDay, () => !sel.dur],
+  ['time', 'Időpont', () => sel.time ? sel.time + '–' + hhmm(mins(sel.time) + sel.dur) : '', stepTime, () => !sel.dur || !sel.date],
+  ['you', 'Adataid', () => user ? (profile?.name || user.email) : '', stepYou, () => false]
 ];
-// A váz egyszer készül el, utána csak az osztályok és a tartalom frissül, így a nyitás-zárás animálható.
 function buildSteps(){
-  $('flow').innerHTML = STEPS.map(([k, title], i) => `<div class="bstep" data-step="${k}" id="st-${k}">
-    <button type="button" class="bstep-head" data-open="${k}" aria-expanded="false" aria-controls="sb-${k}">
-      <span class="bstep-num"><span>${i + 1}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
-      <span class="bstep-title">${title}</span><span class="bstep-sum"></span><span class="bstep-chev" aria-hidden="true"></span></button>
-    <div class="bstep-body" id="sb-${k}"><div class="bstep-inner"></div></div></div>`).join('');
+  $('flow').innerHTML = STEPS.map(([k, title], i) => `<div class="bsec" id="st-${k}">
+    <div class="bsec-head"><span class="bstep-num"><span>${i + 1}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+      <span class="bstep-title">${title}</span><span class="bsec-sum"></span></div><div class="bsec-body"></div></div>`).join('') +
+    `<div class="booking-foot"><div class="summary" id="summary" aria-live="polite"></div><button class="btn btn-red" id="bookBtn" data-act="book">Foglalás</button></div><p class="err" id="bk-err" role="alert"></p>`;
 }
+let anim = null;  // melyik lépés gombjai ússzanak be (csak ahol változott a tartalom)
 function renderFlow(){
   $('flow').hidden = !!done; $('flow-done').hidden = !done;
   if (done) {
     $('flow-done').innerHTML = `<div class="done"><div class="tick" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
-      <h3>${done.status === 'pending' ? 'Elküldve' : 'Lefoglalva'}</h3><p class="when">${esc(cap(fmtLong(done.date)))}, ${done.start}</p>
+      <h3>${done.status === 'pending' ? 'Elküldve' : 'Időpont lefoglalva'}</h3>
+      <div class="ticket"><b>${esc(fmtDur(done.dur))}</b><span>${esc(cap(fmtLong(done.date)))}, ${done.start}–${done.end}</span><span>${esc(done.name)} · ${esc(done.email)}</span></div>
       <p>${done.status === 'pending' ? 'Bendi hamarosan jóváhagyja a foglalásodat, erről e-mailt kapsz.' : 'Az időpont a tiéd.'} Előző nap délután küldünk egy emlékeztetőt.</p>
-      <button class="btn btn-line" data-act="again">Új foglalás</button></div>`;
+      <button class="btn btn-line btn-sm" data-act="again">Új foglalás</button></div>`;
   } else {
     for (const [k, , sum, body, locked] of STEPS){
-      const el = $('st-' + k), isOpen = open === k && !locked(), isDone = !!sum() && k !== 'you';
-      el.classList.toggle('open', isOpen); el.classList.toggle('is-done', isDone); el.classList.toggle('locked', locked());
-      el.querySelector('.bstep-head').setAttribute('aria-expanded', isOpen);
-      el.querySelector('.bstep-sum').textContent = sum();
-      const inner = el.querySelector('.bstep-inner'), keepForm = k === 'you' && !user && inner.querySelector('#auth-form') && inner.dataset.tab === authTab;
-      if (!keepForm) { inner.innerHTML = body(); inner.dataset.tab = authTab; }
+      const el = $('st-' + k), b = el.querySelector('.bsec-body');
+      el.classList.toggle('is-done', !!sum() && k !== 'you'); el.classList.toggle('locked', locked());
+      el.querySelector('.bsec-sum').textContent = sum();
+      b.inert = locked();
+      // a belépő űrlapot nem rajzoljuk újra, hogy a begépelt adat megmaradjon
+      if (k === 'you' && !user && b.querySelector('#auth-form') && b.dataset.tab === authTab) continue;
+      b.innerHTML = body(); b.dataset.tab = authTab;
+      if (anim === k) b.querySelectorAll('.opt').forEach(x => x.classList.add('enter'));
     }
+    anim = null;
+    renderDayline(); renderFoot();
   }
-  renderMine(); renderBar(); renderDay();
+  renderMine();
 }
-function go(step){ open = step; renderFlow(); }
-// Jobb oldali napi nézet (csak gépen): a nap foglalt sávjai név nélkül, és a vendég saját kiválasztása.
-function renderDay(){
-  const t = today(); let d = sel.date || (done && done.date);
-  for (let i = 0; !d && i <= S.horizonDays; i++) { const x = addDays(t, i); if (S.hours[String(parse(x).getDay())]) d = x; }
-  if (!d) { $('dayview').innerHTML = ''; return; }
-  const h = S.hours[String(parse(d).getDay())], K = 0.9;
-  let body;
-  if (!h) body = '<p class="hint" style="padding:20px">Ezen a napon zárva.</p>';
-  else {
-    const o = mins(h[0]), c = mins(h[1]), y = m => (Math.min(Math.max(m, o), c) - o) * K;
-    let g = '';
-    for (let m = Math.ceil(o / 60) * 60; m <= c; m += 60) g += `<div class="dv-hour" style="top:${y(m)}px"><span>${hhmm(m)}</span></div>`;
-    if (d === t) { const n = new Date(), nm = n.getHours() * 60 + n.getMinutes(); if (nm > o) g += `<div class="dv-past" style="height:${y(nm)}px"></div>`; }
-    for (const b of busy.filter(b => b.date === d)) {
-      const a = y(mins(b.start)), z = y(mins(b.end)); if (z - a < 1) continue;
-      g += `<div class="dv-busy" style="top:${a}px;height:${z - a}px"><span>Foglalt</span></div>`;
-    }
-    const mine = sel.date === d && sel.time && sel.dur ? [sel.time, sel.dur] : done && done.date === d ? [done.start, done.dur] : null;
-    if (mine) { const a = y(mins(mine[0])), z = y(mins(mine[0]) + mine[1]); g += `<div class="dv-mine" style="top:${a}px;height:${z - a}px"><span>Te: ${mine[0]}–${hhmm(mins(mine[0]) + mine[1])}</span></div>`; }
-    body = `<div class="dv-grid" style="height:${(c - o) * K}px">${g}</div>`;
-  }
-  $('dayview').innerHTML = `<div class="dv-h"><b>${esc(cap(fmtLong(d)))}</b><span>${h ? h[0] + '–' + h[1] : 'zárva'}</span></div>${body}
-    <div class="dv-legend"><span><i class="lb"></i>foglalt</span><span><i class="lm"></i>a te időpontod</span></div>`;
+function renderFoot(){
+  const ready = sel.dur && sel.date && sel.time, full = user && activeCount() >= maxActive(), btn = $('bookBtn');
+  $('summary').innerHTML = sel.dur ? `<b>${fmtDur(sel.dur)}</b>${sel.date ? ' · ' + esc(dayLabel(sel.date)) : ''}${sel.time ? ' ' + sel.time : ''}` : 'Válassz időtartamot.';
+  btn.textContent = sending ? 'Küldés…' : !user && ready ? 'Tovább a belépéshez' : 'Foglalás';
+  btn.disabled = !ready || sending || full;
+  if (full) $('bk-err').textContent = `Egyszerre legfeljebb ${maxActive()} jövőbeli foglalásod lehet. Újhoz előbb mondd le az egyiket.`;
 }
+
+// Napi idővonal csúszkával: foglalt sávok, szabad hely, és a választott időpont; húzható vagy koppintható.
+let dragging = false, DL = null;
+function renderDayline(){
+  const dl = $('dayline'); if (!dl) { DL = null; return; }
+  const h = S.hours[String(parse(sel.date).getDay())]; if (!h) return;
+  const o = mins(h[0]), c = mins(h[1]), span = c - o, pct = m => (Math.min(Math.max(m, o), c) - o) / span * 100;
+  DL = { o, c, span };
+  let blocks = '';
+  if (sel.date === today()) { const n = new Date(), e = n.getHours() * 60 + n.getMinutes() + (S.minNoticeHours || 0) * 60; if (e > o) blocks += `<i class="dl-past" style="left:0;width:${pct(e)}%"></i>`; }
+  for (const b of busy.filter(b => b.date === sel.date)) { const a = pct(mins(b.start)), z = pct(mins(b.end)); if (z > a) blocks += `<i class="dl-busy" style="left:${a}%;width:${z - a}%"></i>`; }
+  const stepH = span > 600 ? 120 : 60; let hours = '';
+  for (let m = Math.ceil(o / 60) * 60; m <= c; m += stepH) hours += `<span style="left:${pct(m)}%">${m / 60}</span>`;
+  dl.innerHTML = `<div class="dl-read"><strong id="dlTime"></strong><small id="dlHint"></small></div>
+    <div class="dl-track" id="dlTrack" title="Húzd a piros csúszkát, vagy koppints egy szabad helyre">${blocks}<span class="dl-pick" id="dlPick" hidden></span></div>
+    <div class="dl-hours" aria-hidden="true">${hours}</div>
+    <div class="dl-legend" aria-hidden="true"><span><i class="lg-b"></i>Foglalt</span><span><i class="lg-f"></i>Szabad</span><span><i class="lg-m"></i>A te időpontod</span></div>`;
+  updatePick();
+}
+function updatePick(){
+  const pick = $('dlPick'), t = $('dlTime'), hint = $('dlHint'); if (!pick || !DL) return;
+  if (sel.time) {
+    const a = mins(sel.time);
+    pick.hidden = false; pick.style.left = (a - DL.o) / DL.span * 100 + '%'; pick.style.width = sel.dur / DL.span * 100 + '%';
+    t.className = ''; t.textContent = sel.time + '–' + hhmm(a + sel.dur);
+    hint.textContent = dragging ? 'Engedd el a kiválasztáshoz' : 'Húzd a csúszkát, vagy válassz lent';
+  } else { pick.hidden = true; t.className = 'empty'; t.textContent = 'Válassz időpontot'; hint.textContent = 'Koppints a csíkra, vagy válassz lent'; }
+}
+function slotAt(x){
+  const tr = $('dlTrack'); if (!tr || !DL) return null;
+  const r = tr.getBoundingClientRect(), want = DL.o + (x - r.left) / r.width * DL.span - sel.dur / 2;
+  let best = null, bd = Infinity;
+  for (const s of starts(sel.date, sel.dur)) { if (s.taken) continue; const d = Math.abs(mins(s.t) - want); if (d < bd) { bd = d; best = s.t; } }
+  return best;
+}
+function moveTo(x){ const s = slotAt(x); if (s && s !== sel.time) { sel.time = s; updatePick(); renderFoot(); $('st-time').querySelector('.bsec-sum').textContent = STEPS[2][2](); if (navigator.vibrate) { try { navigator.vibrate(6); } catch (e) {} } } }
+$('foglalas').addEventListener('pointerdown', e => { const tr = e.target.closest('.dl-track'); if (!tr || !sel.dur) return; dragging = true; tr.classList.add('dragging'); try { tr.setPointerCapture(e.pointerId); } catch (x) {} moveTo(e.clientX); });
+$('foglalas').addEventListener('pointermove', e => { if (dragging) moveTo(e.clientX); });
+const endDrag = () => { if (!dragging) return; dragging = false; renderFlow(); };
+['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => $('foglalas').addEventListener(ev, endDrag, true));
+
 function renderMine(){
   const el = $('mine');
   if (!user || !my.length) { el.hidden = true; return; }
@@ -218,11 +245,8 @@ function renderMine(){
       <div style="text-align:right"><span class="badge b-${st[1]}">${st[0]}</span>${can ? `<br><button class="linkish" data-cancel="${b.id}" style="margin-top:8px">Lemondom</button>` : ''}</div></div>`;
   }).join('');
 }
-function renderBar(){
-  const bar = $('bar'), ready = sel.dur && sel.date && sel.time && !done;
-  bar.classList.toggle('show', !!ready);
-  if (ready) bar.innerHTML = `<p><b>${esc(fmtShort(sel.date))}, ${sel.time}</b>${fmtDur(sel.dur)}</p><button class="btn btn-red" data-act="${user ? 'book' : 'tologin'}" ${sending ? 'disabled' : ''}>${user ? 'Foglalás elküldése' : 'Tovább'}</button>`;
-}
+const near = id => setTimeout(() => { const el = $(id), r = el.getBoundingClientRect(); if (r.top < 80 || r.top > innerHeight * .7) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 60);
+
 function renderInfo(){
   const wd = new Date().getDay();
   $('hours').innerHTML = [1,2,3,4,5,6,0].map(d => { const h = S.hours[String(d)]; return `<tr class="${d === wd ? 'today' : ''}"><td>${WEEKDAYS[d]}${d === wd ? ' (ma)' : ''}</td><td>${h ? h[0] + '–' + h[1] : 'Zárva'}</td></tr>`; }).join('');
@@ -232,20 +256,7 @@ function renderInfo(){
     ${S.instagram ? `<a class="c-ig" href="https://instagram.com/${esc(S.instagram.replace('@', ''))}" target="_blank" rel="noopener"><small>Instagram</small><b>@${esc(S.instagram.replace('@', ''))}</b></a>` : ''}
     ${S.publicEmail ? `<a href="mailto:${esc(S.publicEmail)}"><small>E-mail</small><b>${esc(S.publicEmail)}</b></a>` : ''}`;
 }
-const dayLabelShort = d => d === today() ? 'ma' : d === addDays(today(), 1) ? 'holnap' : fmtShort(d);
-function renderStatus(){
-  const now = new Date(), t = today(), h = S.hours[String(now.getDay())], m = now.getHours() * 60 + now.getMinutes();
-  const isOpen = h && m >= mins(h[0]) && m < mins(h[1]);
-  let next = null; const dur = Math.min(...S.durations);
-  for (let d = t; d <= addDays(t, S.horizonDays) && !next; d = addDays(d, 1)) { const l = slotsFor(d, dur, S, busy); if (l.length) next = [d, l[0]]; }
-  $('st-dot').className = isOpen ? 'open' : '';
-  $('st-head').textContent = isOpen ? `nyitva, ${h[1]}-ig` : 'most zárva';
-  $('st-list').innerHTML = `<div class="prow"><span>Ma</span><b>${h ? h[0] + '–' + h[1] : 'zárva'}</b></div>
-    <div class="prow"><span>Legközelebb szabad</span><b>${next ? esc(dayLabelShort(next[0])) + ', ' + next[1] : 'nincs a következő ' + S.horizonDays + ' napban'}</b></div>
-    <div class="prow"><span>Időtartamok</span><b>${S.durations.map(fmtDur).join(', ')}</b></div>
-    <div class="prow"><span>Előre foglalható</span><b>${S.horizonDays} nap</b></div>`;
-}
-function renderAcct(){ $('acct').innerHTML = user ? `<a class="pill" href="#foglalas" data-act="toyou" title="Bejelentkezve">${esc((profile?.name || user.email).split(' ').pop())}</a>` : `<a class="pill" href="#foglalas" data-act="toyou">Belépés</a>`; }
+function renderAcct(){ $('acct').innerHTML = user ? `<a class="pill" href="#foglalas" data-act="toyou" title="${esc(user.email)}">${esc(profile?.name ? profile.name.split(' ').pop() : user.email.split('@')[0])}</a>` : `<a class="pill" href="#foglalas" data-act="toyou">Belépés</a>`; }
 
 /* ---------- munkáim (galéria) ---------- */
 let lbi = 0;
@@ -279,7 +290,7 @@ async function book(){
     // frissen lekérjük a napot, hátha közben valaki elvitte
     const snap = await getDocs(query(collection(db, 'busy'), where('date', '==', sel.date)));
     busy = busy.filter(b => b.date !== sel.date).concat(snap.docs.map(d => d.data()));
-    if (!slotsFor(sel.date, sel.dur, S, busy).includes(sel.time)) { sending = false; sel.time = null; open = 'time'; renderFlow(); toast('Ezt az időpontot közben lefoglalták. Válassz másikat.'); return; }
+    if (!slotsFor(sel.date, sel.dur, S, busy).includes(sel.time)) { sending = false; sel.time = null; renderFlow(); toast('Ezt az időpontot közben lefoglalták. Válassz másikat.'); return; }
     const ref = doc(collection(db, 'bookings')), end = hhmm(mins(sel.time) + sel.dur);
     const data = { uid: user.uid, name: profile?.name || user.displayName || user.email.split('@')[0], email: user.email, phone: profile?.phone || '',
       dur: sel.dur, date: sel.date, start: sel.time, end, status: S.requireApproval === false ? 'accepted' : 'pending',
@@ -288,10 +299,10 @@ async function book(){
     batch.set(ref, data);
     batch.set(doc(db, 'busy', ref.id), { date: sel.date, start: sel.time, end, kind: 'booking' });
     await batch.commit(); ping();
-    busy.push({ date: sel.date, start: sel.time, end, kind: 'booking' }); renderStatus();
-    done = data; sel.date = sel.time = null; open = 'day';
+    busy.push({ date: sel.date, start: sel.time, end, kind: 'booking' });
+    done = data; sel.date = sel.time = null;
     await loadMine();
-    sending = false; renderFlow(); $('foglalas').scrollIntoView({ behavior: 'smooth' });
+    sending = false; renderFlow(); { const top = $('booking').getBoundingClientRect().top; if (top < 80) $('booking').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   } catch (e) {
     console.error(e); sending = false; renderFlow();
     const err = $('bk-err'); if (err) err.textContent = e.code === 'permission-denied' ? 'A foglalás nem sikerült. Ha újra előfordul, hívd fel Bendit.' : 'A foglalás nem sikerült. Ellenőrizd az internetkapcsolatot, és próbáld újra.';
@@ -305,7 +316,7 @@ async function cancelBooking(id){
     batch.delete(doc(db, 'busy', id));
     await batch.commit(); ping();
     busy = busy.filter(x => !(x.date === b.date && x.start === b.start));
-    await loadMine(); renderFlow(); renderStatus(); toast('Lemondtad az időpontot.');
+    await loadMine(); renderFlow(); toast('Lemondtad az időpontot.');
   } catch (e) { console.error(e); toast('A lemondás nem sikerült. Hívd fel Bendit.'); }
 }
 async function onAuth(e){
@@ -313,26 +324,25 @@ async function onAuth(e){
   const f = Object.fromEntries(new FormData(e.target)), err = $('auth-err'); err.textContent = '';
   try {
     const prof = await submitAuth(authTab, f, p => regProfile = p);
-    if (prof) { profile = prof; $('st-you').querySelector('.bstep-inner').innerHTML = ''; renderFlow(); renderAcct(); toast('Regisztráltál, be vagy jelentkezve.'); }
+    if (prof) { profile = prof; $('st-you').querySelector('.bsec-body').innerHTML = ''; renderFlow(); renderAcct(); toast('Regisztráltál, be vagy jelentkezve.'); }
   } catch (x) { regProfile = null; err.textContent = x.msg || authError(x); }
 }
 
 /* ---------- események ---------- */
 document.addEventListener('click', async e => {
-  const t = e.target.closest('[data-dur],[data-day],[data-time],[data-tab],[data-act],[data-cancel],[data-open],[data-gal],[data-lb]'); if (!t) return;
+  const t = e.target.closest('[data-dur],[data-day],[data-time],[data-tab],[data-act],[data-cancel],[data-gal],[data-lb]'); if (!t) return;
   const d = t.dataset;
-  if (d.open) { if (!t.closest('.bstep').classList.contains('locked')) go(open === d.open ? null : d.open); }
-  else if (d.dur) { sel.dur = Number(d.dur); sel.time = null; if (sel.date && !slotsFor(sel.date, sel.dur, S, busy).length) sel.date = null; done = null; go('day'); }
-  else if (d.day) { sel.date = d.day; sel.time = null; go('time'); }
-  else if (d.time) { sel.time = d.time; go('you'); setTimeout(() => $('st-you').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 250); }
+  if (d.dur) { sel.dur = Number(d.dur); sel.time = null; if (sel.date && !slotsFor(sel.date, sel.dur, S, busy).length) sel.date = null; done = null; anim = sel.date ? 'time' : 'day'; renderFlow(); near(sel.date ? 'st-time' : 'st-day'); }
+  else if (d.day) { sel.date = d.day; sel.time = null; anim = 'time'; renderFlow(); near('st-time'); }
+  else if (d.time) { sel.time = d.time; renderFlow(); if (!user) near('st-you'); }
   else if (d.tab) { authTab = d.tab; renderFlow(); }
   else if (d.cancel) cancelBooking(d.cancel);
   else if (d.gal) { lbShow(Number(d.gal)); $('lb').showModal(); }
   else if (d.lb) { if (d.lb === 'x') $('lb').close(); else lbShow(lbi + Number(d.lb)); }
-  else if (d.act === 'book') book();
-  else if (d.act === 'tologin' || d.act === 'toyou') { e.preventDefault(); done = null; go('you'); $('st-you').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  else if (d.act === 'book') { if (user) book(); else $('st-you').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  else if (d.act === 'toyou') { e.preventDefault(); if (done) { done = null; renderFlow(); } $('st-you').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
   else if (d.act === 'logout') signOut(auth);
-  else if (d.act === 'again') { done = null; go(sel.dur ? 'day' : 'dur'); }
+  else if (d.act === 'again') { done = null; renderFlow(); $('booking').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   else if (d.act === 'reset') resetPassword();
 });
 document.addEventListener('submit', e => { if (e.target.id === 'auth-form') onAuth(e); });
@@ -353,7 +363,7 @@ getDoc(doc(db, 'settings', 'hero')).then(s => { const img = s.exists() && s.data
 getDocs(collection(db, 'gallery')).then(s => { gallery = s.docs.map(d => ({ id: d.id, ...d.data() })).filter(g => g.img).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)); renderGallery(); }).catch(e => console.error(e));
 if (S.shopEnabled) getDocs(collection(db, 'products')).then(s => renderProducts(s.docs.map(d => ({ id: d.id, ...d.data() })).filter(p => p.visible !== false).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)))).catch(e => console.error(e));
 try { await loadBusy(); } catch (e) { console.error(e); }
-renderFlow(); renderStatus();
+renderFlow();
 onAuthStateChanged(auth, async u => {
   user = u; profile = u ? await loadProfile(u, regProfile) : null;
   try { await loadMine(); } catch (e) { console.error(e); }
