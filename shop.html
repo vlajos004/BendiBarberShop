@@ -11,79 +11,175 @@
 <link rel="apple-touch-icon" href="data:image/png;base64,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">
 <link rel="preload" href="bricolage-grotesque-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <script>if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('js');</script>
-<link rel="stylesheet" href="site.css?v=9">
+<link rel="stylesheet" href="site.css?v=14">
 </head>
-<body>
+<body class="shop-page">
 <header class="top" id="top">
   <div class="wrap">
     <a class="logo" href="index.html"><i aria-hidden="true"></i>Bendi</a>
     <nav class="links" aria-label="Fő menü"><a href="index.html#foglalas">Foglalás</a><a href="shop.html" class="active">Webshop</a><a href="index.html#elerhetoseg">Elérhetőség</a></nav>
-    <div class="acct"><span id="acct"></span></div>
+    <div class="acct"><div id="am"></div></div>
   </div>
 </header>
-<main>
-  <section class="block" style="padding-top:64px">
-    <div class="wrap" id="shop"><p class="hint">Betöltés…</p></div>
-  </section>
-</main>
+
+<main id="shop"><section class="block"><div class="wrap"><p class="hint">Betöltés…</p></div></section></main>
+
 <footer><div class="wrap"><span>Bendi Időpontfoglalás</span><span><a href="index.html">Vissza a kezdőlapra</a> &nbsp;·&nbsp; <a href="adatkezeles.html">Adatkezelési tájékoztató</a></span></div></footer>
-<div class="bar" id="bar" aria-live="polite"></div>
+
+<button class="cart-fab" type="button" data-act="cart" id="cartFab" hidden><span id="fabTxt"></span><b>Kosár →</b></button>
+
+<dialog class="pd" id="pd" aria-label="Termék részletei"><div id="pdIn"></div></dialog>
+<dialog class="drawer" id="drawer" aria-label="Kosár"><div class="dr-in" id="drIn"></div></dialog>
 
 <script type="module">
 import { auth, db, loadPublic, onAuthStateChanged, signOut, doc, getDoc, collection, query, where, getDocs, writeBatch, serverTimestamp,
-  esc, toast, authError, ping, fmtFt, authFormHTML, submitAuth, loadProfile, resetPassword, reveal } from './common.js?v=8';
+  esc, toast, authError, ping, fmtFt, authFormHTML, submitAuth, loadProfile, resetPassword, reveal } from './common.js?v=9';
+import { mountAccount } from './account.js?v=1';
 
 const $ = id => document.getElementById(id);
 const ORDER = { new: ['Beérkezett', 'warn'], ready: ['Átvehető', 'ok'], done: ['Átvéve', 'muted'], cancelled: ['Lemondva', 'muted'] };
-let S, user = null, profile = null, isAdmin = false, products = [], orders = [], regProfile = null, authTab = 'login', sending = false, checkout = false;
+const BAG = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.6l2.3 11.2a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.5L21.5 7H6"/></svg>';
+const CHECK = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+let S, user = null, profile = null, isAdmin = false, products = [], orders = [], regProfile = null, authTab = 'login', sending = false;
+let step = 'cart', lastOrder = null, f = { cat: '', q: '', sort: 'rec' }, pdId = null, pdQty = 1, built = false;
 let cart = {};
 try { cart = JSON.parse(localStorage.getItem('bendi-cart') || '{}') || {}; } catch (e) { cart = {}; }
 const saveCart = () => { try { localStorage.setItem('bendi-cart', JSON.stringify(cart)); } catch (e) {} };
-const lines = () => Object.entries(cart).map(([id, q]) => ({ p: products.find(x => x.id === id), q })).filter(l => l.p && l.q > 0);
-const total = () => lines().reduce((s, l) => s + l.q * (Number(l.p.price) || 0), 0);
+const P = id => products.find(x => x.id === id);
 const left = p => p.stock == null || p.stock === '' ? Infinity : Number(p.stock);
+const lines = () => Object.entries(cart).map(([id, q]) => ({ p: P(id), q })).filter(l => l.p && l.q > 0);
+const count = () => lines().reduce((s, l) => s + l.q, 0);
+const total = () => lines().reduce((s, l) => s + l.q * (Number(l.p.price) || 0), 0);
+const orderNo = id => '#' + String(id).slice(0, 6).toUpperCase();
+const img = (p, cls = '') => p.img ? `<img class="${cls}" src="${p.img}" alt="${esc(p.name)}" decoding="async">` : `<div class="noimg ${cls}">${esc((p.name || '?').slice(0, 1))}</div>`;
+function stockLine(p){
+  const n = left(p);
+  return n <= 0 ? '<span class="stock out"><i></i>Elfogyott</span>' : n < 5 ? `<span class="stock low"><i></i>Még ${n} db</span>` : '<span class="stock in"><i></i>Készleten</span>';
+}
 
+/* ---------- oldal ---------- */
 function render(){
-  const el = $('shop');
   if (!S.shopEnabled && !isAdmin) {
-    el.innerHTML = `<div class="section-head"><span class="kicker">Webshop</span><h2>Hamarosan</h2><p>A webshop még nem nyitott meg. Addig is <a href="index.html#foglalas" style="color:var(--red)">foglalj időpontot</a>.</p></div>`;
-    $('bar').classList.remove('show'); return;
+    $('shop').innerHTML = `<section class="block shop-closed"><div class="wrap"><div class="section-head"><span class="kicker">Webshop</span><h1>Hamarosan nyitunk</h1>
+      <p>A webshop még nem nyitott meg. Addig is foglalj időpontot.</p></div><a class="btn btn-red" href="index.html#foglalas">Időpontot foglalok <span class="arrow" aria-hidden="true">→</span></a></div></section>`;
+    $('cartFab').hidden = true; built = false; return;
   }
-  const L = lines();
-  el.innerHTML = `${!S.shopEnabled ? '<div class="preview-banner"><b>Rejtett előnézet.</b> A webshop ki van kapcsolva, ezt csak te látod adminként. Bekapcsolni az admin felület Webshop fülén tudod.</div>' : ''}
-    <div class="section-head" data-reveal><span class="kicker">Webshop</span><h2>Termékek</h2><p>Foglald le online, és fizess a szalonban átvételkor. Ha átvehető, e-mailt küldünk.</p></div>
-    ${products.length ? `<div class="products">${products.map((p, i) => { const n = cart[p.id] || 0, out = left(p) <= 0;
-      return `<article class="product" id="p-${p.id}" data-reveal style="--d:${Math.min(i, 6) * 60}ms">
-        <div class="ph" style="${p.img ? `background-image:url('${p.img}')` : ''}">${p.img ? '' : 'Nincs kép'}</div>
-        <div class="pb"><h3>${esc(p.name)}</h3><p class="desc">${esc(p.desc || '')}</p><p class="price">${fmtFt(p.price)}</p>
-          ${out ? '<span class="badge b-muted" style="justify-self:start">Elfogyott</span>' : left(p) < 5 ? `<span class="badge b-warn" style="justify-self:start">Még ${left(p)} db</span>` : ''}</div>
-        <div class="pf">${n ? `<span class="qty"><button data-q="${p.id}" data-d="-1" aria-label="Kevesebb">−</button><b>${n}</b><button data-q="${p.id}" data-d="1" aria-label="Több" ${n >= left(p) ? 'disabled' : ''}>+</button></span>` : ''}
-          <button class="btn ${n ? 'btn-line' : 'btn-red'} btn-sm" data-q="${p.id}" data-d="1" ${out || n >= left(p) ? 'disabled' : ''}>${n ? 'Még egy' : 'Kosárba'}</button></div></article>`; }).join('')}</div>`
-      : '<p class="hint">Még nincs feltöltött termék.</p>'}
-    <div id="checkout" style="margin-top:40px;max-width:640px" ${checkout && L.length ? '' : 'hidden'}>
-      <div class="mine" style="margin:0"><h3>Rendelés</h3>
-        ${L.map(l => `<div class="mb"><div><b>${esc(l.p.name)}</b><br><span class="hint">${l.q} × ${fmtFt(l.p.price)}</span></div><b>${fmtFt(l.q * l.p.price)}</b></div>`).join('')}
-        <div class="mb"><span>Összesen, fizetés a szalonban</span><b style="font:800 1.3rem var(--display)">${fmtFt(total())}</b></div>
-        <div style="margin-top:12px" id="co-body"></div></div></div>
-    <div class="mine" id="my-orders" ${user && orders.length ? '' : 'hidden'} style="margin-top:24px;max-width:640px"><h3>Rendeléseid</h3>
-      ${orders.map(o => `<div class="mb"><div><b>${o.items.map(i => esc(i.name) + (i.qty > 1 ? ' ×' + i.qty : '')).join(', ')}</b><br><span class="hint">${fmtFt(o.total)}</span></div>
-        <div style="text-align:right"><span class="badge b-${(ORDER[o.status] || ['', 'muted'])[1]}">${(ORDER[o.status] || [o.status])[0]}</span>${o.status === 'new' ? `<br><button class="linkish" data-ocancel="${o.id}" style="margin-top:8px">Lemondom</button>` : ''}</div></div>`).join('')}</div>`;
-  renderCheckout(); renderBar(); reveal();
+  if (!built) {
+    const cats = [...new Set(products.map(p => (p.category || '').trim()).filter(Boolean))];
+    $('shop').innerHTML = `${!S.shopEnabled ? '<div class="wrap" style="padding-top:24px"><div class="preview-banner"><b>Rejtett előnézet.</b> A webshop ki van kapcsolva, ezt csak te látod adminként. Bekapcsolni az admin felület Webshop fülén tudod.</div></div>' : ''}
+      <section class="shop-hero"><div class="wrap">
+        <span class="kicker">Webshop</span><h1>Bendi termékek</h1>
+        <p class="lead">Amit a szalonban is használok. Foglald le online, és fizess átvételkor a szalonban.</p>
+        <ul class="trust"><li>${CHECK}Átvétel a szalonban</li><li>${CHECK}Fizetés átvételkor</li><li>${CHECK}E-mailt kapsz, ha kész</li></ul>
+      </div></section>
+      <section class="shop-main"><div class="wrap">
+        <div class="toolbar">
+          <div class="chips" role="group" aria-label="Kategória">${['', ...cats].map(c => `<button type="button" class="chip-f ${f.cat === c ? 'on' : ''}" data-cat="${esc(c)}">${c ? esc(c) : 'Összes'}</button>`).join('')}</div>
+          <div class="tools"><label class="search"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Keresés" value="${esc(f.q)}" aria-label="Keresés a termékek között"></label>
+            <select id="sort" aria-label="Rendezés"><option value="rec">Ajánlott</option><option value="pa">Ár szerint ↑</option><option value="pd">Ár szerint ↓</option><option value="name">Név szerint</option></select></div>
+        </div>
+        <p class="result" id="result"></p>
+        <div class="pgrid" id="grid"></div>
+        <div class="shop-actions"><a class="btn btn-line" href="index.html">← Vissza a főoldalra</a><button type="button" class="btn btn-red" data-act="cart" id="cartBig"></button></div>
+        <div id="orders"></div>
+      </div></section>`;
+    $('sort').value = f.sort; built = true;
+  }
+  renderGrid(); renderOrders(); renderCart();
 }
-function renderCheckout(){
-  const el = $('co-body'); if (!el) return;
-  if (!user) { el.innerHTML = '<p class="hint" style="margin-bottom:6px">A rendeléshez lépj be vagy regisztrálj (ugyanaz a fiók, mint az időpontfoglalásnál).</p>' + authFormHTML(authTab); return; }
-  el.innerHTML = `<div class="who"><span>Bejelentkezve: <b>${esc(profile?.name || user.email)}</b></span><button class="linkish" data-act="logout">Kilépés</button></div>
-    <label class="field"><span>Megjegyzés (nem kötelező)</span><textarea name="note" id="note" rows="2" maxlength="300"></textarea></label>
-    <div class="recap"><p>${fmtFt(total())}<small>Fizetés a szalonban, átvételkor</small></p><button class="btn btn-red" data-act="order" ${sending ? 'disabled' : ''}>${sending ? 'Küldés…' : 'Lefoglalom'}</button></div><p class="err" id="o-err"></p>`;
+function renderGrid(){
+  const q = f.q.trim().toLowerCase();
+  let list = products.filter(p => (!f.cat || (p.category || '').trim() === f.cat) && (!q || (p.name + ' ' + (p.desc || '') + ' ' + (p.category || '')).toLowerCase().includes(q)));
+  if (f.sort === 'pa') list.sort((a, b) => a.price - b.price); else if (f.sort === 'pd') list.sort((a, b) => b.price - a.price); else if (f.sort === 'name') list.sort((a, b) => a.name.localeCompare(b.name, 'hu'));
+  $('result').textContent = products.length ? `${list.length} termék` : '';
+  $('grid').innerHTML = !products.length ? '<div class="empty-shop">Még nincs feltöltött termék.</div>' : !list.length ? '<div class="empty-shop">Nincs találat. Próbálj másik keresést vagy kategóriát.</div>'
+    : list.map((p, i) => { const out = left(p) <= 0, n = cart[p.id] || 0;
+      return `<article class="pcard ${out ? 'is-out' : ''}" id="p-${p.id}" data-reveal style="--d:${Math.min(i, 8) * 50}ms">
+        <button type="button" class="pc-img" data-open="${p.id}" aria-label="${esc(p.name)} részletei">${img(p)}${p.category ? `<span class="pc-cat">${esc(p.category)}</span>` : ''}${out ? '<span class="pc-out">Elfogyott</span>' : ''}</button>
+        <div class="pc-body"><button type="button" class="pc-name" data-open="${p.id}">${esc(p.name)}</button><p class="pc-desc">${esc(p.desc || '')}</p>
+          <div class="pc-foot"><span class="pc-price">${fmtFt(p.price)}</span>
+          ${n ? `<span class="qty pc-qty"><button data-cq="${p.id}" data-d="-1" aria-label="Egyel kevesebb: ${esc(p.name)}">−</button><b aria-live="polite">${n}</b><button data-cq="${p.id}" data-d="1" aria-label="Még egy: ${esc(p.name)}" ${n >= left(p) ? 'disabled' : ''}>+</button></span>`
+            : `<button type="button" class="pc-add" data-add="${p.id}" ${out ? 'disabled' : ''} aria-label="${esc(p.name)} kosárba">${BAG}<span class="plus">+</span></button>`}</div></div></article>`; }).join('');
+  reveal();
 }
-function renderBar(){
-  const L = lines(), n = L.reduce((s, l) => s + l.q, 0), bar = $('bar');
-  bar.classList.toggle('always', n > 0); bar.classList.toggle('show', n > 0 && !checkout);
-  if (n) bar.innerHTML = `<p><b>Kosár: ${n} termék</b>${fmtFt(total())}</p><button class="btn btn-line btn-sm" data-act="clear">Ürítés</button><button class="btn btn-red" data-act="tocheckout">Tovább</button>`;
+function renderOrders(){
+  const el = $('orders'); if (!el) return;
+  el.innerHTML = user && orders.length ? `<div class="my-orders"><h2>Rendeléseid</h2>${orders.map(o => `<div class="ord"><div class="ord-h"><b>${orderNo(o.id)}</b><span class="badge b-${(ORDER[o.status] || ['', 'muted'])[1]}">${(ORDER[o.status] || [o.status])[0]}</span></div>
+    <p>${o.items.map(i => esc(i.name) + (i.qty > 1 ? ' × ' + i.qty : '')).join(', ')}</p><div class="ord-f"><span>${fmtFt(o.total)}</span>${o.status === 'new' ? `<button class="linkish" data-ocancel="${o.id}">Lemondom</button>` : ''}</div></div>`).join('')}</div>` : '';
 }
-function renderAcct(){ $('acct').innerHTML = user ? `<span class="pill">${esc((profile?.name || user.email).split(' ').pop())}</span>` : ''; }
 
+/* ---------- termék részletei ---------- */
+function openProduct(id){
+  const p = P(id); if (!p) return;
+  pdId = id; pdQty = 1; renderPd(); if (!$('pd').open) $('pd').showModal();
+  history.replaceState(null, '', '#p-' + id);
+}
+function renderPd(){
+  const p = P(pdId), out = left(p) <= 0, room = Math.max(0, left(p) - (cart[p.id] || 0));
+  pdQty = Math.max(1, Math.min(pdQty, room || 1));
+  $('pdIn').innerHTML = `<button class="x" data-act="pdclose" aria-label="Bezárás">✕</button>
+    <div class="pd-img">${img(p)}</div>
+    <div class="pd-info">${p.category ? `<span class="kicker">${esc(p.category)}</span>` : ''}<h2>${esc(p.name)}</h2>
+      <p class="pd-price">${fmtFt(p.price)}</p>${stockLine(p)}
+      ${p.desc ? `<p class="pd-desc">${esc(p.desc).replace(/\n/g, '<br>')}</p>` : ''}
+      <div class="pd-buy"><span class="qty"><button data-pq="-1" aria-label="Kevesebb" ${pdQty <= 1 ? 'disabled' : ''}>−</button><b>${pdQty}</b><button data-pq="1" aria-label="Több" ${pdQty >= room ? 'disabled' : ''}>+</button></span>
+        <button class="btn btn-red" data-act="pdadd" ${out || !room ? 'disabled' : ''}>${out ? 'Elfogyott' : !room ? 'A teljes készlet a kosaradban' : 'Kosárba ' + BAG}</button></div>
+      <ul class="pd-notes"><li>${CHECK}Átvétel a szalonban, nyitvatartási időben</li><li>${CHECK}Fizetés átvételkor, előre nem kell fizetni</li><li>${CHECK}E-mailt kapsz, amikor átveheted</li></ul></div>`;
+}
+
+/* ---------- kosár ---------- */
+function add(id, n = 1){
+  const p = P(id); if (!p) return;
+  const before = cart[id] || 0, after = Math.min(left(p), before + n); if (after === before) return;
+  cart[id] = after; saveCart(); renderGrid(); renderCart();
+  toast(`Kosárba tetted: ${p.name}${after - before > 1 ? ' × ' + (after - before) : ''}`);
+}
+function setQty(id, q){ const p = P(id); if (!p) return; q = Math.max(0, Math.min(left(p), q)); if (q) cart[id] = q; else delete cart[id]; saveCart(); renderGrid(); renderCart(); }
+function renderCart(){
+  const n = count();
+  const big = $('cartBig'); if (big) { big.disabled = !n; big.innerHTML = n ? `${BAG} Kosár megnyitása · ${n} termék, ${fmtFt(total())}` : `${BAG} A kosarad még üres`; }
+  $('cartFab').hidden = !n || $('drawer').open; $('fabTxt').innerHTML = `${n} termék · <b>${fmtFt(total())}</b>`;
+  if ($('drawer').open) renderDrawer();
+}
+function openCart(){ if (step === 'done') step = 'cart'; renderDrawer(); if (!$('drawer').open) $('drawer').showModal(); $('cartFab').hidden = true; }
+function closeCart(){ $('drawer').close(); }
+function renderDrawer(){
+  const L = lines(), el = $('drIn');
+  const head = t => `<div class="dr-head">${step === 'checkout' ? '<button class="dr-back" data-act="back" aria-label="Vissza a kosárhoz">←</button>' : ''}<h2>${t}</h2><button class="x" data-act="close" aria-label="Bezárás">✕</button></div>`;
+  if (step === 'done' && lastOrder) {
+    el.innerHTML = head('Köszönöm!') + `<div class="dr-body dr-done"><div class="tick" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+      <h3>Megkaptam a rendelésed</h3><p class="ordno">Rendelésszám: <b>${orderNo(lastOrder.id)}</b></p>
+      <p>Visszaigazolást küldtem a(z) <b>${esc(user?.email || '')}</b> címre. Ha összekészítettem, újra írok, és a szalonban átveheted. Fizetés átvételkor.</p>
+      <div class="dr-sum">${lastOrder.items.map(i => `<div><span>${i.qty} × ${esc(i.name)}</span><span>${fmtFt(i.qty * i.price)}</span></div>`).join('')}<div class="tot"><span>Összesen</span><span>${fmtFt(lastOrder.total)}</span></div></div></div>
+      <div class="dr-foot"><button class="btn btn-line" data-act="close" style="width:100%">Vissza a vásárláshoz</button></div>`;
+    return;
+  }
+  if (!L.length) { step = 'cart'; el.innerHTML = head('Kosár') + `<div class="dr-body dr-empty">${BAG}<p>A kosarad üres.</p><button class="btn btn-line btn-sm" data-act="close">Vásárlás folytatása</button></div>`; return; }
+  if (step === 'checkout') {
+    const keep = !user && el.querySelector('#auth-form') && el.dataset.tab === authTab && el.dataset.step === 'checkout';
+    if (keep) return;
+    el.dataset.tab = authTab; el.dataset.step = 'checkout';
+    el.innerHTML = head('Rendelés') + `<div class="dr-body">
+      <div class="dr-sum">${L.map(l => `<div><span>${l.q} × ${esc(l.p.name)}</span><span>${fmtFt(l.q * l.p.price)}</span></div>`).join('')}<div class="tot"><span>Összesen</span><span>${fmtFt(total())}</span></div></div>
+      <div class="dr-pay"><b>Fizetés a szalonban, átvételkor.</b> Most csak lefoglalod a termékeket.</div>
+      ${user ? `<div class="who"><span>Bejelentkezve: <b>${esc(profile?.name || user.email)}</b><br><span class="hint">${esc(user.email)}</span></span><button class="linkish" data-act="logout">Kilépés</button></div>
+        <label class="field"><span>Megjegyzés (nem kötelező)</span><textarea id="note" rows="3" maxlength="300" placeholder="Pl. mikor jönnél érte"></textarea></label>`
+        : `<p class="hint" style="margin:18px 0 6px">A rendeléshez lépj be, vagy regisztrálj (ugyanaz a fiók, mint az időpontfoglalásnál).</p>${authFormHTML(authTab)}`}
+      <p class="err" id="o-err"></p></div>
+      ${user ? `<div class="dr-foot"><button class="btn btn-red" data-act="order" style="width:100%" ${sending ? 'disabled' : ''}>${sending ? 'Küldés…' : 'Rendelés leadása · ' + fmtFt(total())}</button></div>` : ''}`;
+    return;
+  }
+  el.dataset.step = 'cart';
+  el.innerHTML = head(`Kosár <small>${count()}</small>`) + `<div class="dr-body"><ul class="cl">${L.map(l => `<li>
+      <button class="cl-img" data-open="${l.p.id}" aria-label="${esc(l.p.name)}">${img(l.p)}</button>
+      <div class="cl-mid"><b>${esc(l.p.name)}</b><span>${fmtFt(l.p.price)} / db</span>
+        <span class="qty sm"><button data-cq="${l.p.id}" data-d="-1" aria-label="Kevesebb">−</button><b>${l.q}</b><button data-cq="${l.p.id}" data-d="1" aria-label="Több" ${l.q >= left(l.p) ? 'disabled' : ''}>+</button></span></div>
+      <div class="cl-end"><b>${fmtFt(l.q * l.p.price)}</b><button class="linkish" data-rm="${l.p.id}">Törlés</button></div></li>`).join('')}</ul></div>
+    <div class="dr-foot"><div class="tot"><span>Összesen</span><b>${fmtFt(total())}</b></div><p class="hint">Fizetés a szalonban, átvételkor.</p>
+      <button class="btn btn-red" data-act="checkout" style="width:100%">Tovább a rendeléshez <span class="arrow" aria-hidden="true">→</span></button></div>`;
+}
+
+/* ---------- rendelés ---------- */
 async function loadOrders(){
   if (!user) { orders = []; return; }
   const s = await getDocs(query(collection(db, 'orders'), where('uid', '==', user.uid)));
@@ -92,59 +188,83 @@ async function loadOrders(){
 async function placeOrder(){
   const L = lines(); if (!L.length || sending) return;
   const note = ($('note')?.value || '').trim().slice(0, 300);  // újrarajzolás előtt olvassuk ki
-  sending = true; renderCheckout();
+  sending = true; renderDrawer(); if ($('note')) $('note').value = note;
   try {
     const items = L.map(l => ({ pid: l.p.id, name: l.p.name, price: Number(l.p.price) || 0, qty: l.q }));
     const ref = doc(collection(db, 'orders')), b = writeBatch(db);
     // shortcut: az árat és a készletet a böngésző küldi; mivel a vendég a szalonban fizet, Bendi a valós árat kéri el. Online fizetésnél ezt szerveren kell ellenőrizni.
-    b.set(ref, { uid: user.uid, name: profile?.name || user.displayName || user.email.split('@')[0], email: user.email, phone: profile?.phone || '',
-      items, total: items.reduce((s, i) => s + i.price * i.qty, 0), note,
-      status: 'new', notified: false, mailed: true, created: serverTimestamp(), createdMs: Date.now() });
-    await b.commit(); ping();
-    cart = {}; saveCart(); checkout = false; sending = false;
-    await loadOrders(); render(); $('my-orders').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    toast('Lefoglaltad. Ha átvehető, e-mailt kapsz.');
-  } catch (e) { console.error(e); sending = false; renderCheckout(); if ($('note')) $('note').value = note; const er = $('o-err'); if (er) er.textContent = 'A rendelés nem sikerült. Próbáld újra, vagy hívd fel Bendit.'; }
+    const data = { uid: user.uid, name: profile?.name || user.displayName || user.email.split('@')[0], email: user.email, phone: profile?.phone || '',
+      items, total: items.reduce((s, i) => s + i.price * i.qty, 0), note, status: 'new', notified: false, mailed: true, created: serverTimestamp(), createdMs: Date.now() };
+    b.set(ref, data); await b.commit(); ping();
+    lastOrder = { id: ref.id, ...data }; cart = {}; saveCart(); sending = false; step = 'done';
+    await loadOrders(); renderDrawer(); renderGrid(); renderOrders(); renderCart();
+  } catch (e) { console.error(e); sending = false; renderDrawer(); if ($('note')) $('note').value = note; const er = $('o-err'); if (er) er.textContent = 'A rendelés nem sikerült. Próbáld újra, vagy hívd fel Bendit.'; }
 }
 async function cancelOrder(id){
-  if (!confirm('Lemondod ezt a rendelést?')) return;
-  try { const b = writeBatch(db); b.update(doc(db, 'orders', id), { status: 'cancelled', cancelledBy: 'guest' }); await b.commit(); ping(); await loadOrders(); render(); toast('Lemondtad a rendelést.'); }
+  if (!confirm(`Lemondod a(z) ${orderNo(id)} rendelést?`)) return;
+  try { const b = writeBatch(db); b.update(doc(db, 'orders', id), { status: 'cancelled', cancelledBy: 'guest' }); await b.commit(); ping(); await loadOrders(); renderOrders(); toast('Lemondtad a rendelést.'); }
   catch (e) { console.error(e); toast('Nem sikerült lemondani. Hívd fel Bendit.'); }
 }
 
+/* ---------- események ---------- */
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-q],[data-act],[data-tab],[data-ocancel]'); if (!t) return;
+  const t = e.target.closest('[data-add],[data-open],[data-act],[data-tab],[data-ocancel],[data-cat],[data-pq],[data-cq],[data-rm]'); if (!t) return;
   const d = t.dataset;
-  if (d.q) { const p = products.find(x => x.id === d.q); cart[d.q] = Math.max(0, Math.min(left(p), (cart[d.q] || 0) + Number(d.d))); if (!cart[d.q]) delete cart[d.q]; saveCart(); render(); }
-  else if (d.tab) { authTab = d.tab; renderCheckout(); }
+  if (d.add) add(d.add);
+  else if (d.open) { if ($('drawer').open) closeCart(); openProduct(d.open); }
+  else if (d.cat !== undefined) { f.cat = d.cat; document.querySelectorAll('.chip-f').forEach(c => c.classList.toggle('on', c.dataset.cat === f.cat)); renderGrid(); }
+  else if (d.pq) { pdQty += Number(d.pq); renderPd(); }
+  else if (d.cq) setQty(d.cq, (cart[d.cq] || 0) + Number(d.d));
+  else if (d.rm) setQty(d.rm, 0);
+  else if (d.tab) { authTab = d.tab; renderDrawer(); }
   else if (d.ocancel) cancelOrder(d.ocancel);
-  else if (d.act === 'tocheckout') { checkout = true; render(); $('checkout').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-  else if (d.act === 'clear') { cart = {}; saveCart(); checkout = false; render(); }
+  else if (d.act === 'pdadd') { add(pdId, pdQty); $('pd').close(); }
+  else if (d.act === 'pdclose') $('pd').close();
+  else if (d.act === 'cart') openCart();
+  else if (d.act === 'close') closeCart();
+  else if (d.act === 'checkout') { step = 'checkout'; renderDrawer(); }
+  else if (d.act === 'back') { step = 'cart'; renderDrawer(); }
   else if (d.act === 'order') placeOrder();
   else if (d.act === 'logout') signOut(auth);
   else if (d.act === 'reset') resetPassword();
 });
+// a háttérre kattintva bezárul
+['pd', 'drawer'].forEach(id => $(id).addEventListener('click', e => { if (e.target === $(id)) $(id).close(); }));
+$('pd').addEventListener('close', () => history.replaceState(null, '', location.pathname));
+$('drawer').addEventListener('close', () => { if (step === 'done') step = 'cart'; renderCart(); });
+document.addEventListener('input', e => { if (e.target.id === 'q') { f.q = e.target.value; renderGrid(); } });
+document.addEventListener('change', e => { if (e.target.id === 'sort') { f.sort = e.target.value; renderGrid(); } });
 document.addEventListener('submit', async e => {
   if (e.target.id !== 'auth-form') return; e.preventDefault();
   const err = $('auth-err'); err.textContent = '';
-  try { const p = await submitAuth(authTab, Object.fromEntries(new FormData(e.target)), x => regProfile = x); if (p) { profile = p; renderCheckout(); renderAcct(); } }
+  try { const p = await submitAuth(authTab, Object.fromEntries(new FormData(e.target)), x => regProfile = x); if (p) { profile = p; user = auth.currentUser || user; $('drIn').dataset.step = ''; renderDrawer(); } }
   catch (x) { regProfile = null; err.textContent = x.msg || authError(x); }
 });
 
+/* ---------- indulás ---------- */
 S = await loadPublic();
+mountAccount($('am'));
 async function loadProducts(){
   const s = await getDocs(collection(db, 'products'));
   products = s.docs.map(d => ({ id: d.id, ...d.data() })).filter(p => p.visible !== false).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  for (const id of Object.keys(cart)) if (!P(id)) delete cart[id];  // eltűnt termék ne maradjon a kosárban
 }
 if (S.shopEnabled) { try { await loadProducts(); } catch (e) { console.error(e); } }
 render();
 onAuthStateChanged(auth, async u => {
   user = u; profile = u ? await loadProfile(u, regProfile) : null; isAdmin = false;
   if (u) { try { isAdmin = (await getDoc(doc(db, 'admins', u.uid))).exists(); } catch (e) {} }
-  if (isAdmin && !S.shopEnabled && !products.length) { try { await loadProducts(); } catch (e) { console.error(e); } }
+  if (isAdmin && !S.shopEnabled && !products.length) { try { await loadProducts(); built = false; } catch (e) { console.error(e); } }
   try { await loadOrders(); } catch (e) { console.error(e); }
-  render(); renderAcct();
-  if (location.hash) document.querySelector(location.hash)?.scrollIntoView({ block: 'center' });
+  if ($('drIn').dataset.step === 'checkout') $('drIn').dataset.step = '';
+  render(); if ($('drawer').open) renderDrawer();
+  const m = location.hash.match(/^#p-(.+)$/); if (m && P(m[1]) && !$('pd').open) openProduct(m[1]);
+});
+// a fejléc fiók menüjében belépett, regisztrált vagy lemondott valamit
+document.addEventListener('bendi:changed', async () => {
+  if (user) profile = await loadProfile(user, regProfile);
+  try { await loadOrders(); } catch (e) { console.error(e); }
+  renderOrders(); if ($('drawer').open) renderDrawer();
 });
 </script>
 </body>

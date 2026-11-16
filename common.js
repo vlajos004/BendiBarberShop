@@ -24,7 +24,8 @@ export const DEFAULT_PUBLIC = {
   maxActive: 2,
   minNoticeHours: 2,
   requireApproval: true,
-  shopEnabled: false
+  shopEnabled: false,
+  galleryEnabled: true
 };
 export const DEFAULT_PRIVATE = {
   notifyEmail: '',
@@ -111,9 +112,10 @@ export async function compressImage(file, max = 1400, limit = 600000){
 }
 
 /* ---------- közös belépés / regisztráció (foglalás és webshop) ---------- */
-export function authFormHTML(tab){
+// id: a menüben (am) és az oldalon (auth) egyszerre is lehet űrlap, ezért külön azonosító kell
+export function authFormHTML(tab, id = 'auth'){
   return `<div class="tabs" role="tablist"><button type="button" role="tab" class="${tab === 'login' ? 'on' : ''}" data-tab="login">Belépés</button><button type="button" role="tab" class="${tab === 'reg' ? 'on' : ''}" data-tab="reg">Regisztráció</button></div>
-    <form id="auth-form" novalidate>
+    <form id="${id}-form" novalidate>
     ${tab === 'reg' ? `<div class="two"><label class="field"><span>Teljes név</span><input name="name" autocomplete="name" required></label>
     <label class="field"><span>Telefonszám</span><input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+36 30 123 4567" required></label></div>` : ''}
     <div class="two"><label class="field"><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label>
@@ -121,7 +123,7 @@ export function authFormHTML(tab){
     ${tab === 'reg' ? `<label class="check"><input type="checkbox" name="consent" required><span>Elolvastam és elfogadom az <a href="adatkezeles.html" target="_blank">adatkezelési tájékoztatót</a>.</span></label>` : ''}
     <div class="recap" style="margin-top:18px">${tab === 'login' ? '<button type="button" class="btn btn-line" data-act="reset">Elfelejtett jelszó</button>' : '<span></span>'}
     <button class="btn btn-red" type="submit">${tab === 'reg' ? 'Regisztrálok' : 'Belépek'}</button></div>
-    <p class="err" id="auth-err"></p></form>`;
+    <p class="err" id="${id}-err"></p></form>`;
 }
 // Regisztrációnál a profilt előre átadja (onRegProfile), mert a belépés eseménye hamarabb lefuthat, mint ahogy elmentjük.
 export async function submitAuth(tab, f, onRegProfile){
@@ -146,8 +148,8 @@ export async function loadProfile(u, regProfile){
     return p.exists() ? p.data() : (regProfile && regProfile.email === u.email ? regProfile : { name: u.displayName, phone: '' }); }
   catch (e) { console.error(e); return { name: u.displayName, phone: '' }; }
 }
-export async function resetPassword(){
-  const el = document.querySelector('#auth-form [name=email]'), err = document.getElementById('auth-err'), em = el ? el.value.trim() : '';
+export async function resetPassword(id = 'auth'){
+  const el = document.querySelector(`#${id}-form [name=email]`), err = document.getElementById(id + '-err'), em = el ? el.value.trim() : '';
   if (!em) { err.textContent = 'Írd be az e-mail-címed, és kattints újra.'; return; }
   try { await sendPasswordResetEmail(auth, em); toast('Elküldtük a jelszó-visszaállító e-mailt.'); } catch (x) { err.textContent = authError(x); }
 }

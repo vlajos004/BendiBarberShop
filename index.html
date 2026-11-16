@@ -12,7 +12,7 @@
 <link rel="preload" href="bricolage-grotesque-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="manrope-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <script>if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('js');</script>
-<link rel="stylesheet" href="site.css?v=9">
+<link rel="stylesheet" href="site.css?v=14">
 </head>
 <body>
 <div class="progress" id="progress" aria-hidden="true"></div>
@@ -25,7 +25,7 @@
       <a href="shop.html" id="nav-shop" hidden>Webshop</a>
       <a href="#elerhetoseg">Elérhetőség</a>
     </nav>
-    <div class="acct"><span id="acct"></span><a class="btn btn-red btn-sm" href="#foglalas">Foglalok <span class="arrow" aria-hidden="true">→</span></a></div>
+    <div class="acct"><a class="btn btn-red btn-sm" href="#foglalas">Foglalok <span class="arrow" aria-hidden="true">→</span></a><div id="am"></div></div>
   </div>
 </header>
 
@@ -56,7 +56,6 @@
       <div class="demo-copy" data-reveal>
         <span class="kicker">Online foglalás</span><h2>Foglalj időpontot</h2>
         <p class="muted-p">Válaszd ki, mennyi időre jössz, aztán a napot és az órát. Egy perc az egész.</p>
-        <ul class="ticks"><li>a foglalt időpontot senki más nem tudja lefoglalni</li><li>előző nap délután e-mailben emlékeztetünk</li><li>ha közbejön valami, egy kattintással lemondhatod</li></ul>
         <div class="mine" id="mine" hidden></div>
       </div>
       <div class="booking-card" id="booking" data-reveal="scale">
@@ -90,7 +89,8 @@
 <script type="module">
 import { auth, db, loadPublic, onAuthStateChanged, signOut, doc, getDoc, collection, query, where, getDocs, writeBatch, serverTimestamp,
   today, parse, addDays, mins, hhmm, fmtLong, fmtShort, fmtDur, esc, WEEKDAYS, randToken, slotsFor, STATUS, CONFIRM, toast, authError, bLabel, ping,
-  fmtFt, authFormHTML, submitAuth, loadProfile, resetPassword, reveal } from './common.js?v=8';
+  fmtFt, authFormHTML, submitAuth, loadProfile, resetPassword, reveal } from './common.js?v=9';
+import { mountAccount } from './account.js?v=1';
 
 let S, user = null, profile = null, busy = [], my = [], regProfile = null, gallery = [];
 const sel = { dur: null, date: null, time: null };
@@ -251,22 +251,21 @@ function renderInfo(){
   const wd = new Date().getDay();
   $('hours').innerHTML = [1,2,3,4,5,6,0].map(d => { const h = S.hours[String(d)]; return `<tr class="${d === wd ? 'today' : ''}"><td>${WEEKDAYS[d]}${d === wd ? ' (ma)' : ''}</td><td>${h ? h[0] + '–' + h[1] : 'Zárva'}</td></tr>`; }).join('');
   const maps = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(S.address || '');
-  $('contact').innerHTML = `${S.phone ? `<a href="tel:${esc(S.phone.replace(/\s/g, ''))}"><small>Telefon</small><b>${esc(S.phone)}</b></a>` : ''}
+  $('contact').innerHTML = `${S.phone ? `<a class="c-tel" href="tel:${esc(S.phone.replace(/\s/g, ''))}"><small>Telefon</small><b>${esc(S.phone)}</b></a>` : ''}
     ${S.address ? `<a class="c-map" href="${maps}" target="_blank" rel="noopener"><small>Cím, térképen</small><b>${esc(S.address)}</b></a>` : ''}
     ${S.instagram ? `<a class="c-ig" href="https://instagram.com/${esc(S.instagram.replace('@', ''))}" target="_blank" rel="noopener"><small>Instagram</small><b>@${esc(S.instagram.replace('@', ''))}</b></a>` : ''}
     ${S.publicEmail ? `<a href="mailto:${esc(S.publicEmail)}"><small>E-mail</small><b>${esc(S.publicEmail)}</b></a>` : ''}`;
 }
-function renderAcct(){ $('acct').innerHTML = user ? `<a class="pill" href="#foglalas" data-act="toyou" title="${esc(user.email)}">${esc(profile?.name ? profile.name.split(' ').pop() : user.email.split('@')[0])}</a>` : `<a class="pill" href="#foglalas" data-act="toyou">Belépés</a>`; }
 
 /* ---------- munkáim (galéria) ---------- */
 let lbi = 0;
 function renderGallery(){
-  const on = gallery.length > 0;
+  const list = gallery, on = S.galleryEnabled !== false && list.length > 0;
   ['munkak', 'nav-munkak', 'cta-munkak'].forEach(id => $(id).hidden = !on);
-  // 5 képtől az első kép kétsoros kiemelés; mobilon az első teljes széles, ezért páros számnál az utolsót is kiszélesítjük
-  $('gal').classList.toggle('feature', gallery.length >= 5); $('gal').classList.toggle('even', gallery.length % 2 === 0 && gallery.length > 1);
-  $('gal').innerHTML = gallery.map((g, i) => `<button type="button" data-gal="${i}" data-reveal style="--d:${Math.min(i, 6) * 70}ms" aria-label="${esc(g.caption || 'Munka ' + (i + 1))} – nagyítás">
-    <img src="${g.img}" alt="${esc(g.caption || 'Bendi munkája')}" decoding="async">${g.caption ? `<figcaption>${esc(g.caption)}</figcaption>` : ''}</button>`).join('');
+  // az elrendezés a képek számától függ (.n1 … .n6, lásd site.css); 1 képnél mögé kerül egy elmosott másolata
+  $('gal').className = 'gallery n' + list.length;
+  $('gal').innerHTML = list.map((g, i) => `<button type="button" data-gal="${i}" data-reveal style="--d:${i * 90}ms;--i:${i}" aria-label="${esc(g.caption || 'Munka ' + (i + 1))} – nagyítás">
+    ${list.length === 1 ? `<img class="amb" src="${g.img}" alt="" aria-hidden="true">` : ''}<img src="${g.img}" alt="${esc(g.caption || 'Bendi munkája')}" decoding="async">${g.caption ? `<figcaption>${esc(g.caption)}</figcaption>` : ''}</button>`).join('');
   reveal();
 }
 function lbShow(i){ lbi = (i + gallery.length) % gallery.length; const g = gallery[lbi]; $('lb-img').src = g.img; $('lb-img').alt = g.caption || 'Bendi munkája'; $('lb-cap').textContent = g.caption || ''; }
@@ -324,7 +323,7 @@ async function onAuth(e){
   const f = Object.fromEntries(new FormData(e.target)), err = $('auth-err'); err.textContent = '';
   try {
     const prof = await submitAuth(authTab, f, p => regProfile = p);
-    if (prof) { profile = prof; $('st-you').querySelector('.bsec-body').innerHTML = ''; renderFlow(); renderAcct(); toast('Regisztráltál, be vagy jelentkezve.'); }
+    if (prof) { profile = prof; $('st-you').querySelector('.bsec-body').innerHTML = ''; renderFlow(); toast('Regisztráltál, be vagy jelentkezve.'); }
   } catch (x) { regProfile = null; err.textContent = x.msg || authError(x); }
 }
 
@@ -340,12 +339,13 @@ document.addEventListener('click', async e => {
   else if (d.gal) { lbShow(Number(d.gal)); $('lb').showModal(); }
   else if (d.lb) { if (d.lb === 'x') $('lb').close(); else lbShow(lbi + Number(d.lb)); }
   else if (d.act === 'book') { if (user) book(); else $('st-you').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-  else if (d.act === 'toyou') { e.preventDefault(); if (done) { done = null; renderFlow(); } $('st-you').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
   else if (d.act === 'logout') signOut(auth);
   else if (d.act === 'again') { done = null; renderFlow(); $('booking').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   else if (d.act === 'reset') resetPassword();
 });
 document.addEventListener('submit', e => { if (e.target.id === 'auth-form') onAuth(e); });
+// a kép fénye követi az egeret
+$('gal').addEventListener('pointermove', e => { const b = e.target.closest('button'); if (!b) return; const r = b.getBoundingClientRect(); b.style.setProperty('--mx', (e.clientX - r.left) + 'px'); b.style.setProperty('--my', (e.clientY - r.top) + 'px'); });
 $('lb').addEventListener('click', e => { if (e.target === $('lb') || e.target.classList.contains('lb-in')) $('lb').close(); });
 document.addEventListener('keydown', e => { if ($('lb').open && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) lbShow(lbi + (e.key === 'ArrowRight' ? 1 : -1)); });
 let ticking = false;
@@ -357,17 +357,24 @@ addEventListener('scroll', () => { if (ticking) return; ticking = true; requestA
 buildSteps();
 S = await loadPublic();
 if (!Array.isArray(S.durations) || !S.durations.length) S.durations = [30, 45, 60, 90];
-renderInfo(); renderFlow(); renderAcct(); reveal();
+renderInfo(); renderFlow(); reveal();
+mountAccount($('am'));
 getDoc(doc(db, 'settings', 'hero')).then(s => { const img = s.exists() && s.data().img; if (!img) return;
   const bg = $('heroBg'); bg.style.backgroundImage = `url('${img}')`; $('hero').classList.add('has-img'); requestAnimationFrame(() => bg.classList.add('on')); }).catch(e => console.error(e));
-getDocs(collection(db, 'gallery')).then(s => { gallery = s.docs.map(d => ({ id: d.id, ...d.data() })).filter(g => g.img).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)); renderGallery(); }).catch(e => console.error(e));
+getDocs(collection(db, 'gallery')).then(s => { gallery = s.docs.map(d => ({ id: d.id, ...d.data() })).filter(g => g.img).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).slice(0, 6); renderGallery(); }).catch(e => console.error(e));
 if (S.shopEnabled) getDocs(collection(db, 'products')).then(s => renderProducts(s.docs.map(d => ({ id: d.id, ...d.data() })).filter(p => p.visible !== false).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)))).catch(e => console.error(e));
 try { await loadBusy(); } catch (e) { console.error(e); }
 renderFlow();
 onAuthStateChanged(auth, async u => {
   user = u; profile = u ? await loadProfile(u, regProfile) : null;
   try { await loadMine(); } catch (e) { console.error(e); }
-  renderFlow(); renderAcct();
+  renderFlow();
+});
+// a fejléc fiók menüjében belépett, regisztrált vagy lemondott valamit
+document.addEventListener('bendi:changed', async () => {
+  if (user) profile = await loadProfile(user, regProfile);
+  try { await loadBusy(); await loadMine(); } catch (e) { console.error(e); }
+  renderFlow();
 });
 </script>
 </body>
