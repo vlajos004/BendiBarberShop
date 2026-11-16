@@ -1,4 +1,4 @@
-import { firebaseConfig, PING_URL } from './config.js?v=7';
+import { firebaseConfig, PING_URL } from './config.js?v=8';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -23,7 +23,8 @@ export const DEFAULT_PUBLIC = {
   horizonDays: 14,
   maxActive: 2,
   minNoticeHours: 2,
-  requireApproval: true
+  requireApproval: true,
+  shopEnabled: false
 };
 export const DEFAULT_PRIVATE = {
   notifyEmail: '',
@@ -88,6 +89,75 @@ export function toast(msg){
   let t = document.getElementById('toast');
   if (!t){ t = document.createElement('div'); t.id = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
   t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+export const fmtFt = n => Math.round(Number(n) || 0).toLocaleString('hu-HU').replace(/ /g, ' ') + ' Ft';
+
+// Kép lekicsinyítése JPEG-be, hogy beférjen egy Firestore-dokumentumba (1 MB alatt). A Firebase képtárhely bankkártyás csomagot kérne.
+export async function compressImage(file, max = 1400, limit = 600000){
+  if (!file || !/^image\//.test(file.type || 'image/')) throw new Error('Ez nem kép.');
+  let bmp;
+  try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+  catch (e) { throw new Error('Ezt a képformátumot a böngésző nem tudja megnyitni. Mentsd el JPG-ként, és próbáld újra.'); }
+  let side = max;
+  for (let i = 0; i < 8; i++){
+    const k = Math.min(1, side / Math.max(bmp.width, bmp.height)), w = Math.round(bmp.width * k), h = Math.round(bmp.height * k);
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const x = c.getContext('2d'); x.fillStyle = '#000'; x.fillRect(0, 0, w, h); x.drawImage(bmp, 0, 0, w, h);
+    for (const q of [.82, .72, .62]) { const u = c.toDataURL('image/jpeg', q); if (u.length <= limit) return u; }
+    side = Math.round(side * .8);
+  }
+  throw new Error('A kép túl nagy, nem sikerült lekicsinyíteni.');
+}
+
+/* ---------- közös belépés / regisztráció (foglalás és webshop) ---------- */
+export function authFormHTML(tab){
+  return `<div class="tabs" role="tablist"><button type="button" role="tab" class="${tab === 'login' ? 'on' : ''}" data-tab="login">Belépés</button><button type="button" role="tab" class="${tab === 'reg' ? 'on' : ''}" data-tab="reg">Regisztráció</button></div>
+    <form id="auth-form" novalidate>
+    ${tab === 'reg' ? `<div class="two"><label class="field"><span>Teljes név</span><input name="name" autocomplete="name" required></label>
+    <label class="field"><span>Telefonszám</span><input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+36 30 123 4567" required></label></div>` : ''}
+    <div class="two"><label class="field"><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label>
+    <label class="field"><span>Jelszó</span><input name="password" type="password" autocomplete="${tab === 'reg' ? 'new-password' : 'current-password'}" minlength="6" required></label></div>
+    ${tab === 'reg' ? `<label class="check"><input type="checkbox" name="consent" required><span>Elolvastam és elfogadom az <a href="adatkezeles.html" target="_blank">adatkezelési tájékoztatót</a>.</span></label>` : ''}
+    <div class="recap" style="margin-top:18px">${tab === 'login' ? '<button type="button" class="btn btn-line" data-act="reset">Elfelejtett jelszó</button>' : '<span></span>'}
+    <button class="btn btn-red" type="submit">${tab === 'reg' ? 'Regisztrálok' : 'Belépek'}</button></div>
+    <p class="err" id="auth-err"></p></form>`;
+}
+// Regisztrációnál a profilt előre átadja (onRegProfile), mert a belépés eseménye hamarabb lefuthat, mint ahogy elmentjük.
+export async function submitAuth(tab, f, onRegProfile){
+  if (tab === 'reg') {
+    if (!f.name || f.name.trim().length < 2) throw { msg: 'Add meg a teljes neved.' };
+    if (!/^[+\d][\d\s\-()]{7,}$/.test((f.phone || '').trim())) throw { msg: 'Adj meg egy érvényes telefonszámot.' };
+    if (!f.consent) throw { msg: 'A regisztrációhoz fogadd el az adatkezelési tájékoztatót.' };
+    const prof = { name: f.name.trim(), email: (f.email || '').trim().toLowerCase(), phone: f.phone.trim() };
+    if (onRegProfile) onRegProfile(prof);
+    const cred = await createUserWithEmailAndPassword(auth, (f.email || '').trim(), f.password || '');
+    prof.email = cred.user.email;
+    await setDoc(doc(db, 'users', cred.user.uid), { ...prof, created: serverTimestamp() });
+    await updateProfile(cred.user, { displayName: prof.name });
+    return prof;
+  }
+  await signInWithEmailAndPassword(auth, (f.email || '').trim(), f.password || '');
+  return null;
+}
+export async function loadProfile(u, regProfile){
+  try { const p = await getDoc(doc(db, 'users', u.uid));
+    // a regisztrációs űrlap adatait csak ugyanahhoz a címhez használjuk (sikertelen regisztráció után ne ragadjon rá más fiókra)
+    return p.exists() ? p.data() : (regProfile && regProfile.email === u.email ? regProfile : { name: u.displayName, phone: '' }); }
+  catch (e) { console.error(e); return { name: u.displayName, phone: '' }; }
+}
+export async function resetPassword(){
+  const el = document.querySelector('#auth-form [name=email]'), err = document.getElementById('auth-err'), em = el ? el.value.trim() : '';
+  if (!em) { err.textContent = 'Írd be az e-mail-címed, és kattints újra.'; return; }
+  try { await sendPasswordResetEmail(auth, em); toast('Elküldtük a jelszó-visszaállító e-mailt.'); } catch (x) { err.textContent = authError(x); }
+}
+
+// Görgetésre beúszó elemek ([data-reveal]); csökkentett mozgás beállításnál nincs animáció (a <head> csak akkor teszi ki a .js osztályt).
+let io = null;
+export function reveal(root = document){
+  if (!document.documentElement.classList.contains('js')) return;
+  io = io || new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
+  root.querySelectorAll('[data-reveal]:not(.in)').forEach(el => io.observe(el));
 }
 
 export function authError(e){

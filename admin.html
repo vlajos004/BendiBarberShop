@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css?v=8">
 <style>
 body{background:var(--cream);color:var(--text);padding-bottom:calc(30px + env(safe-area-inset-bottom))}
 .top{position:sticky;top:0;z-index:20;background:rgba(236,238,241,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top)) 0 0}
@@ -82,6 +82,17 @@ h2.sec{font-size:22px;margin:24px 0 12px}
 .chip{border-color:var(--line);background:#fff}
 .chip.on{background:var(--text);border-color:var(--text);color:var(--cream)}
 .chip small{color:var(--muted)}
+.ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.gitem{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.gitem .im{aspect-ratio:4/5;background:#eee center/cover no-repeat}
+.gitem .gb{padding:10px;display:grid;gap:8px}
+.gitem input{width:100%;font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:8px}
+.gitem .row{margin-top:0;gap:6px}.gitem .row .btn{min-width:0;flex:1;padding:0 8px}
+.upl{display:inline-flex;cursor:pointer}
+.pitem{display:flex;gap:14px;align-items:center}
+.pitem .im{width:72px;height:72px;border-radius:12px;background:#eee center/cover no-repeat;flex:none}
+.btn[disabled]{background:#f3f3f3;color:#b5b5b5;border-color:var(--line)}
+.heroimg{aspect-ratio:16/7;border-radius:14px;background:#111 center/cover no-repeat;margin:10px 0;display:grid;place-items:center;color:#888;font-size:14px}
 </style>
 </head>
 <body>
@@ -90,11 +101,14 @@ h2.sec{font-size:22px;margin:24px 0 12px}
 <script type="module">
 import { auth, db, DEFAULT_PUBLIC, DEFAULT_PRIVATE, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail,
   doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, serverTimestamp,
-  today, parse, toStr, addDays, mins, hhmm, fmtLong, fmtShort, fmtDur, bLabel, esc, WEEKDAYS, randToken, STATUS, CONFIRM, toast, authError, ping } from './common.js?v=7';
+  today, parse, toStr, addDays, mins, hhmm, fmtLong, fmtShort, fmtDur, bLabel, esc, WEEKDAYS, randToken, STATUS, CONFIRM, toast, authError, ping,
+  compressImage, fmtFt } from './common.js?v=8';
 
 const $ = id => document.getElementById(id);
 let user = null, PUB = null, PRIV = null, tab = 'req', pending = [], monthB = [], monthBusy = [], blocks = [];
 let calMonth = today().slice(0, 8) + '01', selDay = today(), showNew = false;
+let gal = [], prods = [], orders = [], editProd = null, heroImg = null, busyUp = false;
+const ORDER = { new: ['Beérkezett', 'warn'], ready: ['Átvehető', 'ok'], done: ['Átvéve', 'muted'], cancelled: ['Lemondva', 'muted'] };
 
 /* ---------- belépés ---------- */
 function loginView(msg = ''){
@@ -138,6 +152,14 @@ async function loadBlocks(){
   blocks = s.docs.map(d => ({ id: d.id, ...d.data() })).filter(x => x.kind === 'block').sort(byTime);
 }
 const byTime = (a, b) => (a.date + a.start).localeCompare(b.date + b.start);
+const byOrder = (a, b) => (a.order ?? 0) - (b.order ?? 0);
+async function loadGallery(){ const s = await getDocs(collection(db, 'gallery')); gal = s.docs.map(d => ({ id: d.id, ...d.data() })).sort(byOrder); }
+async function loadProducts(){ const s = await getDocs(collection(db, 'products')); prods = s.docs.map(d => ({ id: d.id, ...d.data() })).sort(byOrder); }
+async function loadOrders(){
+  const [a, b] = await Promise.all(['new', 'ready'].map(st => getDocs(query(collection(db, 'orders'), where('status', '==', st)))));
+  orders = [...a.docs, ...b.docs].map(d => ({ id: d.id, ...d.data() })).sort((x, y) => (x.createdMs || 0) - (y.createdMs || 0));
+}
+async function loadHero(){ const h = await getDoc(doc(db, 'settings', 'hero')); heroImg = h.exists() ? h.data().img || null : null; }
 const badge = ([t, c]) => `<span class="badge b-${c}">${t}</span>`;
 const bBadges = b => badge(STATUS[b.status] || ['?', 'muted']) + (b.status === 'accepted' && b.guestConfirm ? ' ' + badge(CONFIRM[b.guestConfirm]) : (b.status === 'accepted' && b.reminded && PRIV.reminderConfirm ? ' ' + badge(['Nem válaszolt még', 'muted']) : ''));
 
@@ -149,7 +171,7 @@ function shell(){
   $('out').onclick = () => signOut(auth);
 }
 function renderTabs(){
-  const t = [['req', 'Kérések', pending.length], ['cal', 'Naptár'], ['block', 'Zárolás'], ['set', 'Beállítások']];
+  const t = [['req', 'Kérések', pending.length], ['cal', 'Naptár'], ['block', 'Zárolás'], ['gal', 'Munkáim'], ['shop', 'Webshop', orders.filter(o => o.status === 'new').length], ['set', 'Beállítások']];
   $('tabs').innerHTML = t.map(([k, n, c]) => `<button class="${tab === k ? 'on' : ''}" data-tab="${k}">${n}${c ? `<span class="cnt">${c}</span>` : ''}</button>`).join('');
 }
 async function render(){
@@ -158,7 +180,9 @@ async function render(){
   if (tab === 'req') v.innerHTML = vReq();
   if (tab === 'cal') { await loadMonth(); v.innerHTML = vCal(); }
   if (tab === 'block') { await loadBlocks(); v.innerHTML = vBlock(); }
-  if (tab === 'set') { v.innerHTML = vSet(); bindSet(); }
+  if (tab === 'gal') { await loadGallery(); v.innerHTML = vGal(); }
+  if (tab === 'shop') { await Promise.all([loadProducts(), loadOrders()]); renderTabs(); v.innerHTML = vShop(); }
+  if (tab === 'set') { await loadHero(); v.innerHTML = vSet(); bindSet(); }
 }
 
 function bookingCard(b, actions){
@@ -213,6 +237,45 @@ function newForm(){
     <div class="row"><button class="btn btn-gold">Mentés</button><button type="button" class="btn btn-ghost" data-act="cancelnew">Mégse</button></div></form></div>`;
 }
 
+function vGal(){
+  return `<div class="card"><h3>Munkáim</h3><p class="muted">Ezek a képek a weboldal „Munkáim” részében látszanak, ebben a sorrendben (az első nagyobb). Ha nincs kép, a rész nem jelenik meg. Feltöltéskor a képeket automatikusan lekicsinyítjük.</p>
+    <div class="row"><label class="btn btn-gold upl">${busyUp ? 'Feltöltés…' : '+ Képek feltöltése'}<input type="file" accept="image/*" multiple id="galup" hidden ${busyUp ? 'disabled' : ''}></label></div></div>
+    ${gal.length ? `<div class="ggrid">${gal.map((g, i) => `<div class="gitem"><div class="im" style="background-image:url('${g.img}')"></div><div class="gb">
+      <input data-cap="${g.id}" value="${esc(g.caption || '')}" placeholder="Felirat (nem kötelező)" maxlength="80">
+      <div class="row"><button class="btn btn-ghost btn-sm" data-gmove="${g.id}" data-d="-1" ${i ? '' : 'disabled'} aria-label="Előrébb">↑</button><button class="btn btn-ghost btn-sm" data-gmove="${g.id}" data-d="1" ${i < gal.length - 1 ? '' : 'disabled'} aria-label="Hátrébb">↓</button><button class="btn btn-bad btn-sm" data-gdel="${g.id}">Törlés</button></div></div></div>`).join('')}</div>`
+      : '<div class="card muted">Még nincs feltöltött kép.</div>'}`;
+}
+function vShop(){
+  const o = orders;
+  let h = `<div class="card"><label class="switch" style="border:0;padding:0"><span><b>Webshop látható a weboldalon</b><br><span class="muted">Kikapcsolva a vendégek nem látják, de te belépve megnézheted az előnézetet.</span></span><input type="checkbox" id="shopon" ${PUB.shopEnabled ? 'checked' : ''}></label>
+    <div class="row"><a class="btn btn-ghost btn-sm" href="shop.html" target="_blank" style="flex:none">Webshop előnézete</a></div></div>
+    <h2 class="sec">Rendelések</h2>`;
+  h += o.length ? o.map(x => `<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><h3>${esc(x.name || '')}</h3><span class="badge b-${ORDER[x.status][1]}">${ORDER[x.status][0]}</span></div>
+      <div class="kv">${x.items.map(i => `<span>${i.qty} ×</span><span>${esc(i.name)} – ${fmtFt(i.price)}</span>`).join('')}<span>Összesen</span><span><b>${fmtFt(x.total)}</b></span>
+      ${x.phone ? `<span>Telefon</span><span><a href="tel:${esc(x.phone.replace(/\s/g, ''))}">${esc(x.phone)}</a></span>` : ''}${x.email ? `<span>E-mail</span><span><a href="mailto:${esc(x.email)}">${esc(x.email)}</a></span>` : ''}
+      ${x.note ? `<span>Megjegyzés</span><span>${esc(x.note)}</span>` : ''}</div>
+      <div class="row">${x.status === 'new' ? `<button class="btn btn-ok" data-ost="${x.id}" data-s="ready">Átvehető (e-mailt kap)</button>` : `<button class="btn btn-ok" data-ost="${x.id}" data-s="done">Átvette, kifizette</button>`}<button class="btn btn-bad" data-ost="${x.id}" data-s="cancelled">Lemondom</button></div></div>`).join('')
+    : '<div class="card muted">Nincs nyitott rendelés.</div>';
+  h += `<h2 class="sec">Termékek</h2>${editProd ? prodForm() : '<button class="btn btn-dark" data-act="newprod" style="width:100%;margin-bottom:12px">+ Új termék</button>'}`;
+  h += prods.length ? prods.map((p, i) => `<div class="card pitem"><div class="im" style="${p.img ? `background-image:url('${p.img}')` : ''}"></div><div style="flex:1;min-width:0">
+      <b>${esc(p.name)}</b> ${p.visible === false ? '<span class="badge b-muted">Rejtett</span>' : ''}<div class="muted">${fmtFt(p.price)} · ${p.stock == null || p.stock === '' ? 'korlátlan készlet' : p.stock + ' db készleten'}</div>
+      <div class="row" style="margin-top:8px"><button class="btn btn-ghost btn-sm" data-pedit="${p.id}">Szerkesztés</button><button class="btn btn-ghost btn-sm" data-pmove="${p.id}" data-d="-1" ${i ? '' : 'disabled'}>↑</button><button class="btn btn-ghost btn-sm" data-pmove="${p.id}" data-d="1" ${i < prods.length - 1 ? '' : 'disabled'}>↓</button><button class="btn btn-bad btn-sm" data-pdel="${p.id}">Törlés</button></div></div></div>`).join('')
+    : '<div class="card muted">Még nincs termék.</div>';
+  return h;
+}
+function prodForm(){
+  const p = editProd === 'new' ? { name: '', price: '', stock: '', desc: '', visible: true } : prods.find(x => x.id === editProd);
+  return `<div class="card"><h3>${editProd === 'new' ? 'Új termék' : 'Termék szerkesztése'}</h3><form id="pf">
+    <label class="field"><span>Név</span><input name="name" value="${esc(p.name)}" required maxlength="80"></label>
+    <div class="grid2"><label class="field"><span>Ár (Ft)</span><input name="price" type="number" min="0" step="10" value="${esc(p.price)}" required></label>
+    <label class="field"><span>Készlet (üresen: korlátlan)</span><input name="stock" type="number" min="0" value="${esc(p.stock ?? '')}"></label></div>
+    <label class="field"><span>Leírás</span><textarea name="desc" style="min-height:90px" maxlength="400">${esc(p.desc || '')}</textarea></label>
+    <label class="field"><span>Kép ${p.img ? '(új kép választása lecseréli)' : ''}</span><input name="img" type="file" accept="image/*"></label>
+    ${p.img ? '<label class="check" style="color:var(--text)"><input type="checkbox" name="noimg"><span>Kép törlése</span></label>' : ''}
+    <label class="check" style="color:var(--text)"><input type="checkbox" name="visible" ${p.visible !== false ? 'checked' : ''}><span>Látható a webshopban</span></label>
+    <div class="row"><button class="btn btn-gold">Mentés</button><button type="button" class="btn btn-ghost" data-act="cancelprod">Mégse</button></div></form></div>`;
+}
+
 function vBlock(){
   return `<div class="card"><h3>Zárolás hozzáadása</h3><p class="muted">A zárolt időben senki nem tud foglalni (szabadság, orvos, magánprogram).</p>
     <form id="bf"><div class="grid2"><label class="field"><span>Első nap</span><input name="from" type="date" value="${today()}" required></label><label class="field"><span>Utolsó nap</span><input name="to" type="date" value="${today()}" required></label></div>
@@ -224,7 +287,10 @@ function vBlock(){
 
 function vSet(){
   const P = PUB, Q = PRIV;
-  return `<form id="sf">
+  return `<div class="card"><h3>Nyitókép</h3><p class="muted">A weboldal tetején, a cím mögött látszik. Fekvő kép a legjobb (pl. a szalon vagy egy munka). Feltöltéskor automatikusan lekicsinyítjük.</p>
+    <div class="heroimg" style="${heroImg ? `background-image:url('${heroImg}')` : ''}">${heroImg ? '' : 'Nincs nyitókép, sötét háttér látszik'}</div>
+    <div class="row"><label class="btn btn-gold upl">${heroImg ? 'Kép cseréje' : 'Kép feltöltése'}<input type="file" accept="image/*" id="heroup" hidden></label>${heroImg ? '<button type="button" class="btn btn-ghost" data-act="herodel">Kép törlése</button>' : ''}</div></div>
+  <form id="sf">
   <div class="card"><h3>Működés</h3>
     <label class="switch"><span><b>Foglalások jóváhagyása</b><br><span class="muted">Bekapcsolva minden új foglalást neked kell elfogadnod. Kikapcsolva azonnal elfogadottak.</span></span><input type="checkbox" name="requireApproval" ${P.requireApproval !== false ? 'checked' : ''}></label>
     <label class="switch"><span><b>Megerősítés kérése e-mailben</b><br><span class="muted">Az előző napi emlékeztetőben a vendég egy linkkel megerősíti vagy lemondja az időpontot.</span></span><input type="checkbox" name="reminderConfirm" ${Q.reminderConfirm !== false ? 'checked' : ''}></label>
@@ -328,10 +394,66 @@ async function addBlock(e){
 async function unblock(id){ const batch = writeBatch(db); batch.delete(doc(db, 'busy', id)); await batch.commit(); toast('Zárolás feloldva.'); await render(); }
 async function refresh(){ await loadPending(); await render(); }
 
+async function uploadGallery(files){
+  if (!files.length) return;
+  busyUp = true; $('view').innerHTML = vGal();
+  let next = gal.length ? Math.max(...gal.map(g => g.order ?? 0)) + 1 : 0, ok = 0;
+  for (const f of files){
+    try { const img = await compressImage(f, 1400, 600000); const b = writeBatch(db); b.set(doc(collection(db, 'gallery')), { img, caption: '', order: next++, created: serverTimestamp() }); await b.commit(); ok++; }
+    catch (e) { console.error(e); toast((f.name ? f.name + ': ' : '') + (e.message || 'nem sikerült feltölteni.')); }
+  }
+  busyUp = false; if (ok) toast(`${ok} kép feltöltve.`); await render();
+}
+async function swapOrder(coll, list, id, dir){
+  const i = list.findIndex(x => x.id === id), j = i + dir; if (i < 0 || j < 0 || j >= list.length) return;
+  // a sorrend mindig 0..n-1, így a régi vagy egyforma értékek sem okoznak gondot
+  const arr = list.slice(); [arr[i], arr[j]] = [arr[j], arr[i]];
+  const b = writeBatch(db); arr.forEach((x, k) => { if (x.order !== k) b.update(doc(db, coll, x.id), { order: k }); }); await b.commit(); await render();
+}
+async function delDoc(coll, id, msg){ if (!confirm(msg)) return; const b = writeBatch(db); b.delete(doc(db, coll, id)); await b.commit(); toast('Törölve.'); await render(); }
+async function uploadHero(file){
+  try { toast('Feltöltés…'); const img = await compressImage(file, 1920, 700000); await setDoc(doc(db, 'settings', 'hero'), { img, updated: serverTimestamp() }); toast('Nyitókép elmentve.'); await render(); }
+  catch (e) { console.error(e); toast(e.message || 'Nem sikerült feltölteni.'); }
+}
+async function saveProduct(e){
+  e.preventDefault();
+  const f = e.target, v = n => f.elements[n].value.trim(), old = editProd === 'new' ? null : prods.find(x => x.id === editProd);
+  const price = Math.round(Number(v('price'))), stock = v('stock') === '' ? null : Math.max(0, Math.round(Number(v('stock'))));
+  if (!v('name')) { toast('Add meg a termék nevét.'); return; }
+  if (!(price >= 0)) { toast('Adj meg egy érvényes árat.'); return; }
+  const data = { name: v('name'), price, stock, desc: f.elements.desc.value.trim(), visible: f.elements.visible.checked,
+    img: old?.img || null, order: old ? old.order ?? 0 : (prods.length ? Math.max(...prods.map(p => p.order ?? 0)) + 1 : 0) };
+  try {
+    const file = f.elements.img.files[0];
+    if (file) data.img = await compressImage(file, 1000, 400000);
+    else if (f.elements.noimg?.checked) data.img = null;
+    await setDoc(old ? doc(db, 'products', old.id) : doc(collection(db, 'products')), data);
+    editProd = null; toast('Termék elmentve.'); await render();
+  } catch (x) { console.error(x); toast(x.message || 'Nem sikerült menteni.'); }
+}
+async function setOrder(id, st){
+  const o = orders.find(x => x.id === id);
+  if (st === 'cancelled' && !confirm(`Lemondod ${o?.name || 'a vendég'} rendelését? E-mailt kap róla.`)) return;
+  const patch = { status: st };
+  if (st === 'ready' || st === 'cancelled') patch.mailed = false;  // az e-mail-szkript küld levelet a vendégnek
+  if (st === 'cancelled') patch.cancelledBy = 'admin';
+  try { await updateDoc(doc(db, 'orders', id), patch); ping(); toast(st === 'ready' ? 'Átvehető. A vendég e-mailt kap.' : st === 'done' ? 'Lezárva.' : 'Lemondva.'); await render(); }
+  catch (e) { console.error(e); toast('Hiba történt.'); }
+}
+
 document.addEventListener('click', async e => {
-  const t = e.target.closest('[data-tab],[data-acc],[data-rej],[data-ban],[data-day],[data-mon],[data-act],[data-unblock],[data-acancel],[data-remind]'); if (!t) return;
+  const t = e.target.closest('[data-tab],[data-acc],[data-rej],[data-ban],[data-day],[data-mon],[data-act],[data-unblock],[data-acancel],[data-remind],[data-gmove],[data-gdel],[data-pmove],[data-pdel],[data-pedit],[data-ost]'); if (!t) return;
   const d = t.dataset;
-  if (d.tab) { tab = d.tab; showNew = false; render(); }
+  if (d.tab) { tab = d.tab; showNew = false; editProd = null; render(); }
+  else if (d.gmove) swapOrder('gallery', gal, d.gmove, Number(d.d));
+  else if (d.gdel) delDoc('gallery', d.gdel, 'Törlöd ezt a képet?');
+  else if (d.pmove) swapOrder('products', prods, d.pmove, Number(d.d));
+  else if (d.pdel) delDoc('products', d.pdel, 'Törlöd ezt a terméket?');
+  else if (d.pedit) { editProd = d.pedit; $('view').innerHTML = vShop(); $('pf').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  else if (d.ost) setOrder(d.ost, d.s);
+  else if (d.act === 'newprod') { editProd = 'new'; $('view').innerHTML = vShop(); }
+  else if (d.act === 'cancelprod') { editProd = null; $('view').innerHTML = vShop(); }
+  else if (d.act === 'herodel') { if (confirm('Törlöd a nyitóképet?')) { const b = writeBatch(db); b.delete(doc(db, 'settings', 'hero')); await b.commit(); toast('Nyitókép törölve.'); await render(); } }
   else if (d.acc) accept(d.acc);
   else if (d.rej) reject(d.rej);
   else if (d.ban) reject(d.ban, true);
@@ -345,8 +467,16 @@ document.addEventListener('click', async e => {
   else if (d.act === 'preview') preview();
   else if (d.act === 'tplreset') { const f = $('sf'); f.elements.reminderSubject.value = DEFAULT_PRIVATE.reminderSubject; f.elements.reminderBody.value = DEFAULT_PRIVATE.reminderBody; }
 });
-document.addEventListener('submit', e => { if (e.target.id === 'nf') addBooking(e); if (e.target.id === 'bf') addBlock(e); });
-document.addEventListener('change', e => { if (e.target.id === 'whole') $('bt').style.display = e.target.checked ? 'none' : 'grid'; });
+document.addEventListener('submit', e => { if (e.target.id === 'nf') addBooking(e); if (e.target.id === 'bf') addBlock(e); if (e.target.id === 'pf') saveProduct(e); });
+document.addEventListener('change', async e => {
+  const t = e.target;
+  if (t.id === 'whole') $('bt').style.display = t.checked ? 'none' : 'grid';
+  if (t.id === 'galup') uploadGallery([...t.files]);
+  if (t.id === 'heroup' && t.files[0]) uploadHero(t.files[0]);
+  if (t.dataset.cap) { try { await updateDoc(doc(db, 'gallery', t.dataset.cap), { caption: t.value.trim() }); const g = gal.find(x => x.id === t.dataset.cap); if (g) g.caption = t.value.trim(); toast('Felirat mentve.'); } catch (x) { console.error(x); toast('Nem sikerült menteni.'); } }
+  if (t.id === 'shopon') { const pub = { ...PUB, shopEnabled: t.checked };
+    try { await setDoc(doc(db, 'settings', 'public'), pub); PUB = pub; toast(t.checked ? 'A webshop most már látható.' : 'A webshop elrejtve.'); } catch (x) { console.error(x); t.checked = !t.checked; toast('Nem sikerült menteni.'); } }
+});
 
 onAuthStateChanged(auth, async u => {
   user = u;
@@ -354,7 +484,7 @@ onAuthStateChanged(auth, async u => {
   try {
     const a = await getDoc(doc(db, 'admins', u.uid));
     if (!a.exists()) { await signOut(auth); return loginView('Ehhez a fiókhoz nincs admin jogosultság.'); }
-    await loadSettings(); await loadPending(); shell(); await render();
+    await loadSettings(); await loadPending(); try { await loadOrders(); } catch (x) { console.error(x); } shell(); await render();
   } catch (e) { console.error(e); loginView('Nem sikerült betölteni az adatokat. Ellenőrizd a beállításokat.'); }
 });
 </script>
