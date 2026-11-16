@@ -12,7 +12,7 @@
 <link rel="preload" href="bricolage-grotesque-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="manrope-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <script>if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('js');</script>
-<link rel="stylesheet" href="site.css?v=14">
+<link rel="stylesheet" href="site.css?v=20">
 </head>
 <body>
 <div class="progress" id="progress" aria-hidden="true"></div>
@@ -20,8 +20,8 @@
   <div class="wrap">
     <a class="logo" href="#"><i aria-hidden="true"></i>Bendi</a>
     <nav class="links" aria-label="Fő menü">
-      <a href="#munkak" id="nav-munkak" hidden>Munkáim</a>
       <a href="#foglalas">Foglalás</a>
+      <a href="#munkak" id="nav-munkak" hidden>Munkáim</a>
       <a href="shop.html" id="nav-shop" hidden>Webshop</a>
       <a href="#elerhetoseg">Elérhetőség</a>
     </nav>
@@ -44,14 +44,7 @@
     </div>
   </section>
 
-  <section class="block alt" id="munkak" hidden>
-    <div class="wrap">
-      <div class="section-head" data-reveal><span class="kicker">Referenciák</span><h2>Munkáim</h2><p>Néhány friss vágás. Kattints egy képre a nagyobb nézethez.</p></div>
-      <div class="gallery" id="gal"></div>
-    </div>
-  </section>
-
-  <section class="block" id="foglalas">
+  <section class="block alt" id="foglalas">
     <div class="wrap demo-grid">
       <div class="demo-copy" data-reveal>
         <span class="kicker">Online foglalás</span><h2>Foglalj időpontot</h2>
@@ -63,6 +56,13 @@
         <div class="booking-body" id="flow"></div>
         <div id="flow-done" hidden></div>
       </div>
+    </div>
+  </section>
+
+  <section class="block" id="munkak" hidden>
+    <div class="wrap">
+      <div class="section-head" data-reveal><span class="kicker">Referenciák</span><h2>Munkáim</h2><p>Néhány friss vágás. Kattints egy képre a nagyobb nézethez.</p></div>
+      <div class="gallery" id="gal"></div>
     </div>
   </section>
 
@@ -81,7 +81,7 @@
     </div>
   </section>
 </main>
-<footer><div class="wrap"><span>Bendi Időpontfoglalás</span><span><a href="adatkezeles.html">Adatkezelési tájékoztató</a> &nbsp;·&nbsp; <a href="admin.html">Bendi belépés</a></span></div></footer>
+<footer><div class="wrap"><span>Bendi Időpontfoglalás</span><span><a href="adatkezeles.html">Adatkezelési tájékoztató</a> &nbsp;·&nbsp; <a href="admin.html">Bendi belépés</a></span><p class="credit"><a href="https://beallit.hu" target="_blank" rel="noopener">Az oldalt készítette: <b>Beáll<span>IT</span></b></a></p></div></footer>
 
 <dialog class="lb" id="lb" aria-label="Kép nagyban"><div class="lb-in"><img id="lb-img" alt=""><p class="lb-cap" id="lb-cap"></p>
   <button class="lb-btn lb-x" data-lb="x" aria-label="Bezárás">✕</button><button class="lb-btn lb-p" data-lb="-1" aria-label="Előző kép">‹</button><button class="lb-btn lb-n" data-lb="1" aria-label="Következő kép">›</button></div></dialog>
