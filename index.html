@@ -3,8 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Bendi Időpontfoglalás</title>
-<meta name="description" content="Foglalj időpontot Bendihez online, nézd meg a munkáit.">
+<title>Bendi – hajvágás, online időpontfoglalás</title>
+<meta name="description" content="Foglalj időpontot Bendihez pár kattintással: válaszd ki az időtartamot, a napot és az órát. Nézd meg a munkáit, emlékeztetőt e-mailben küldünk.">
+<!-- SEO: a webcím változásakor (saját domain) ezt a 4 sort és a sitemap.xml-t is át kell írni -->
+<link rel="canonical" href="https://vlajos004.github.io/BendiBarberShop/">
+<meta property="og:url" content="https://vlajos004.github.io/BendiBarberShop/">
+<meta property="og:image" content="https://vlajos004.github.io/BendiBarberShop/og.jpg">
+<meta name="twitter:image" content="https://vlajos004.github.io/BendiBarberShop/og.jpg">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="hu_HU">
+<meta property="og:site_name" content="Bendi">
+<meta property="og:title" content="Bendi – hajvágás, online időpontfoglalás">
+<meta property="og:description" content="Foglalj időpontot Bendihez pár kattintással: válaszd ki az időtartamot, a napot és az órát. Nézd meg a munkáit, emlékeztetőt e-mailben küldünk.">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Bendi – hajvágás, online időpontfoglalás">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#050505">
 <meta name="apple-mobile-web-app-title" content="Bendi">
 <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAF8UlEQVR42tVazU8TTRifZ2a2LYESoRGNWBCUHghiggQNHjx5NZyUiBw4eSEhKQcvvfk3gIaLMYQYolcSAgdjwEQSNIrRhECJHySaEE1tFqgzuzMenvfdt28/gG63pf0dmn7sbuf3fD/PDJA8MAyDMQYAWmsppW3bpLxgjBmGAQCEEMuypJQ5L4PsrzjnnHOllGVZSily3GCMcc4ZY1LKbBqZBHw+HyFESqm1JpUEAPD5fACQSqXyXuT3+xljpILBOQ8EApTS3EaPBlfhQA4k23I456RKwBjz+/34niIn9PRqIWDbttb6P4nn0Eg1oKamhhDCDMPQWldCuHQRlxhjFACqyHjSYVkWAFDMtdVIQGtNKaVVunqEUgoopYU6QJHpwkOR5c5opQallHPu1X+DiyQSCoVcx2/TNP/8+eM8SilVpEJ4QZJTSp07d+7NmzfoPIXakm3biUQiHo+/ePHi+fPn6+vrzmPLpHpCSEdHh/YCqVRqamrq5MmT5TNlhwD2CbZtq8Jh2zZ2J0hja2urs7OzTBwcAliKoPm6hlJKCKG1/vLlS1NTE6XUHQfqYVo5FBmx2DAMKWVLS8vExEQ53KB4DaDtZX+ptb527RrGpRJGoYOxu7uLS8nZiQNAfX19zpYDaYyMjLx69cpFiuSe5HNK6fDw8NLSElaI2QQopaFQaGhoKBaLwb9wfgKA/v5+Smlpy8p8JoQfr1+/fpSHjI2NOWbjeLPW+ufPnydOnHBRp3jmxGg5nHPIA8YYY2xycnJ7extzcIZ03M0TqAuDyZn8D/VgVJSUcmdnJ7u2+/XrVzKZLG0pgUilUkIIbOdyjp/y2QClVAjR3NwciUTSyxClFAC8fftWSskYK3QE6FkUSiQSlmUd7IV+v//Ro0e1tbW2bacbDAA8fvy45MXcwe3B7du3L126lK+/A4BQKITXKKWc1VuWxTlfXl6en5+nlJZ2AotRqLm5eW9vz3UpgZ6Q/n5nZ+fChQsA4K6U4N7Oag4VgbNK7Gi3t7cHBgY2NzfLUVR7ogFH9kqpDx8+NDU1ORNll6s6lmYcZdHW1jY9Pd3T0yOEKMdQ+VANyKMhPQ1rrff29m7evFmOlsBDE0rnrLUWQly+fPnYqlH0XdM0JycnhRDpkRQjrGmaOEUDANM0+/r67t69iw7NObcsyzCMhw8fXr16tbRDqkM1gM3hoRgcHMy4HY3qxo0bLpRAPRH/169fo9Hojx8/siu8bMt+/fp1NBr9/fu3czvSGBwcLH5qVrAGUHjLy8uEkJaWltnZ2Ugk0tDQ0NjY2Nvbu7a29vLly/Pnzzc2NjY0NPT39z99+tQwDELI5uamk8vw9f379+l9QlkTmWEYgUDgypUrt27d6u7uTiQSWuv29vZTp04RQubn57ECbW1tPXPmzIMHD+LxONJId5XTp0/X1taaplmqefMBGlhYWCCEnD17dnp6uq2tra6uLhgMXrx4cXV1dXFxMRwOB4PBurq63t7eJ0+eYGMZj8cd2RfZ0xRFAF+/ffsWi8UwreIKcBGOA6TbRiQSicViyWTSuR1pbGxsoAeXlUA6urq6jvKcO3fuZFR1Ukql1LNnz1xEIe7VUCiVSo2Pjwshsn8VQuzv76NotdbhcNiyrIx+AABmZmaqLxM7XvTu3Tt3M3fu7abV0TfnnCIcAJRS9+7dy1DLMRAoaKscZ714y/Dw8MrKiouG2CUB7H1d7A/8b3uUUkrp58+fR0dH5+bm3K3ejQ+Ew2FPTH9tbe3+/fsY+ItpBqAgyWmtg8Hg6Ogobo+70EAymfz+/funT58+fvyIPWQ5ZE9Kdu6k+JwFWJGXzlkPGO8VX/AYhsEZY4USqJyjCRRH26SaQY9tv9ujiSCr3jjg8/mUUtSyrGo0JBxF/uONjLHscXmFIxAIYPpjWAxjbq+Wc1vYjmYGQzxWWhWrz3vID3dZKjx519TUpAua5chtnFegLQEACt45rZO3mMNz60qpCjlBjRNIzrkQIrsIgHx0kQZWLHgqo/zWglu3eI4+X/3yF7+XrAUmb1BOAAAAAElFTkSuQmCC">
@@ -12,7 +26,7 @@
 <link rel="preload" href="bricolage-grotesque-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="manrope-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <script>if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('js');</script>
-<link rel="stylesheet" href="site.css?v=22">
+<link rel="stylesheet" href="site.css?v=23">
 </head>
 <body>
 <div class="progress" id="progress" aria-hidden="true"></div>
@@ -249,13 +263,22 @@ const near = id => setTimeout(() => { const el = $(id), r = el.getBoundingClient
 
 function renderInfo(){
   $('remTxt').textContent = reminderText(S);
+  // SEO: strukturált adat a Google-nek (fodrászat, cím, telefon, nyitvatartás); a beállításokból készül, így mindig naprakész
+  const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], base = location.href.split(/[?#]/)[0].replace(/index\.html$/, '');
+  const ld = { '@context': 'https://schema.org', '@type': 'HairSalon', name: S.shopName || 'Bendi', url: base, image: base + 'og.jpg',
+    telephone: S.phone || undefined, email: S.publicEmail || undefined,
+    address: S.address ? { '@type': 'PostalAddress', streetAddress: S.address, addressCountry: 'HU' } : undefined,
+    sameAs: S.instagram ? ['https://instagram.com/' + S.instagram.replace('@', '')] : undefined,
+    openingHoursSpecification: Object.entries(S.hours || {}).filter(([, h]) => h).map(([d, h]) => ({ '@type': 'OpeningHoursSpecification', dayOfWeek: DAYS[Number(d)], opens: h[0], closes: h[1] })) };
+  let ldEl = document.getElementById('ld'); if (!ldEl) { ldEl = document.createElement('script'); ldEl.type = 'application/ld+json'; ldEl.id = 'ld'; document.head.appendChild(ldEl); }
+  ldEl.textContent = JSON.stringify(ld);
   const wd = new Date().getDay();
   $('hours').innerHTML = [1,2,3,4,5,6,0].map(d => { const h = S.hours[String(d)]; return `<tr class="${d === wd ? 'today' : ''}"><td>${WEEKDAYS[d]}${d === wd ? ' (ma)' : ''}</td><td>${h ? h[0] + '–' + h[1] : 'Zárva'}</td></tr>`; }).join('');
   const maps = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(S.address || '');
   $('contact').innerHTML = `${S.phone ? `<a class="c-tel" href="tel:${esc(S.phone.replace(/\s/g, ''))}"><small>Telefon</small><b>${esc(S.phone)}</b></a>` : ''}
-    ${S.address ? `<a class="c-map" href="${maps}" target="_blank" rel="noopener"><small>Cím, térképen</small><b>${esc(S.address)}</b></a>` : ''}
+    ${S.publicEmail ? `<a class="c-mail" href="mailto:${esc(S.publicEmail)}"><small>E-mail</small><b>${esc(S.publicEmail)}</b></a>` : ''}
     ${S.instagram ? `<a class="c-ig" href="https://instagram.com/${esc(S.instagram.replace('@', ''))}" target="_blank" rel="noopener"><small>Instagram</small><b>@${esc(S.instagram.replace('@', ''))}</b></a>` : ''}
-    ${S.publicEmail ? `<a href="mailto:${esc(S.publicEmail)}"><small>E-mail</small><b>${esc(S.publicEmail)}</b></a>` : ''}`;
+    ${S.address ? `<a class="c-map" href="${maps}" target="_blank" rel="noopener"><small>Cím, térképen</small><b>${esc(S.address)}</b></a>` : ''}`;
 }
 
 /* ---------- munkáim (galéria) ---------- */

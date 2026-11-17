@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vlajos004.github.io/BendiBarberShop/sitemap.xml

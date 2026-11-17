@@ -343,7 +343,8 @@ dialog.lb::backdrop{background:rgba(0,0,0,.92);backdrop-filter:blur(6px)}
 .contact-list a:hover small{color:rgba(255,255,255,.9)}
 .contact-list a:hover::after{transform:translate(4px,-50%);color:#fff}
 .contact-list .c-ig{--g:linear-gradient(100deg,#FEDA75 0%,#FA7E1E 25%,#D62976 55%,#962FBF 80%,#4F5BD5 100%)}
-.contact-list .c-tel{--g:linear-gradient(100deg,#188038 0%,#34A853 40%,#1A73E8 100%)}
+.contact-list .c-tel{--g:linear-gradient(100deg,#137333 0%,#34A853 55%,#81C995 100%)}
+.contact-list .c-map{--g:linear-gradient(100deg,#174EA6 0%,#1A73E8 45%,#8AB4F8 100%)}
 
 footer{border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
 footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:28px 0 calc(28px + env(safe-area-inset-bottom))}
