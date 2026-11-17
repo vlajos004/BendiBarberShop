@@ -30,6 +30,9 @@ export const DEFAULT_PUBLIC = {
 export const DEFAULT_PRIVATE = {
   notifyEmail: '',
   reminderConfirm: true,
+  reminderMode: 'prevDay',   // prevDay: előző nap reminderHour órától · hoursBefore: reminderHours órával előtte · off: csak kézzel
+  reminderHour: 16,
+  reminderHours: 24,
   reminderSubject: '{Mikor} {ido}-kor várlak',
   reminderBody: 'Szia {nev}!\n\nEmlékeztetlek, hogy {mikor} {ido}-kor várlak, {idotartam} időtartamra.\n\nItt tudod megerősíteni vagy lemondani: {link}\n\nHa kérdésed van, válaszolj erre a levélre.\n\nBendi'
 };

@@ -113,7 +113,7 @@ pre#pv{background:var(--bg)!important;border:1px solid var(--line);color:var(--i
 import { auth, db, DEFAULT_PUBLIC, DEFAULT_PRIVATE, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail,
   doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, serverTimestamp, increment,
   today, parse, toStr, addDays, mins, hhmm, fmtLong, fmtShort, fmtDur, bLabel, esc, WEEKDAYS, randToken, STATUS, CONFIRM, toast, authError, ping,
-  compressImage, fmtFt, stockMove } from './common.js?v=10';
+  compressImage, fmtFt, stockMove } from './common.js?v=11';
 
 const $ = id => document.getElementById(id);
 let user = null, PUB = null, PRIV = null, tab = 'req', pending = [], monthB = [], monthBusy = [], blocks = [];
@@ -388,10 +388,17 @@ function vSet(){
   <form id="sf">
   <div class="card"><h3>Működés</h3>
     <label class="switch"><span><b>Foglalások jóváhagyása</b><br><span class="muted">Bekapcsolva minden új foglalást neked kell elfogadnod. Kikapcsolva azonnal elfogadottak.</span></span><input type="checkbox" name="requireApproval" ${P.requireApproval !== false ? 'checked' : ''}></label>
-    <label class="switch"><span><b>Megerősítés kérése e-mailben</b><br><span class="muted">Az előző napi emlékeztetőben a vendég egy linkkel megerősíti vagy lemondja az időpontot.</span></span><input type="checkbox" name="reminderConfirm" ${Q.reminderConfirm !== false ? 'checked' : ''}></label>
+    <label class="switch"><span><b>Megerősítés kérése e-mailben</b><br><span class="muted">Az emlékeztetőben a vendég egy linkkel megerősíti vagy lemondja az időpontot.</span></span><input type="checkbox" name="reminderConfirm" ${Q.reminderConfirm !== false ? 'checked' : ''}></label>
     <label class="field"><span>Értesítési e-mail-cím (ide jönnek az új foglalások)</span><input name="notifyEmail" type="email" value="${esc(Q.notifyEmail)}"></label>
   </div>
-  <div class="card"><h3>Emlékeztető e-mail</h3><p class="muted">Előző nap 16:00 után automatikusan megy ki minden elfogadott foglaláshoz, a naptárban pedig kézzel is elküldheted. Helyettesítők: {nev}, {mikor} („holnap (november 10., kedd)” vagy a dátum; {Mikor} nagy kezdőbetűvel a tárgy elejére), {datum}, {ido}, {idotartam}, {link}. Ne írd be fixen, hogy „holnap”, mert a kézzel küldött emlékeztető más napra is szólhat. Ha a megerősítés ki van kapcsolva, a {link}-et tartalmazó sor kimarad.</p>
+  <div class="card"><h3>Emlékeztető e-mail</h3>
+    <div class="grid2"><label class="field"><span>Mikor menjen ki automatikusan?</span><select name="reminderMode">
+        <option value="prevDay" ${Q.reminderMode === 'prevDay' ? 'selected' : ''}>Előző nap, megadott órától</option>
+        <option value="hoursBefore" ${Q.reminderMode === 'hoursBefore' ? 'selected' : ''}>Az időpont előtt ennyi órával</option>
+        <option value="off" ${Q.reminderMode === 'off' ? 'selected' : ''}>Ne menjen automatikusan (csak kézzel)</option></select></label>
+      <label class="field" id="rmHour" ${Q.reminderMode === 'prevDay' ? '' : 'hidden'}><span>Előző nap ekkortól</span><select name="reminderHour">${Array.from({ length: 17 }, (_, i) => i + 6).map(h => `<option value="${h}" ${Number(Q.reminderHour) === h ? 'selected' : ''}>${h}:00</option>`).join('')}</select></label>
+      <label class="field" id="rmHours" ${Q.reminderMode === 'hoursBefore' ? '' : 'hidden'}><span>Ennyi órával előtte</span><select name="reminderHours">${[1, 2, 3, 4, 6, 8, 12, 24, 36, 48, 72].map(h => `<option value="${h}" ${Number(Q.reminderHours) === h ? 'selected' : ''}>${h} órával${h === 24 ? ' (1 nappal)' : h === 48 ? ' (2 nappal)' : h === 72 ? ' (3 nappal)' : ''}</option>`).join('')}</select></label></div>
+    <p class="muted">A naptárban kézzel is bármikor elküldheted. Helyettesítők: {nev}, {mikor} („holnap (november 10., kedd)” vagy a dátum; {Mikor} nagy kezdőbetűvel a tárgy elejére), {datum}, {ido}, {idotartam}, {link}. Ne írd be fixen, hogy „holnap”, mert a kézzel küldött emlékeztető más napra is szólhat. Ha a megerősítés ki van kapcsolva, a {link}-et tartalmazó sor kimarad.</p>
     <label class="field"><span>Tárgy</span><input name="reminderSubject" value="${esc(Q.reminderSubject)}"></label>
     <label class="field"><span>Szöveg</span><textarea name="reminderBody">${esc(Q.reminderBody)}</textarea></label>
     <div class="row"><button type="button" class="btn btn-ghost btn-sm" data-act="preview">Előnézet</button><button type="button" class="btn btn-ghost btn-sm" data-act="tplreset">Alapszöveg visszaállítása</button></div>
@@ -432,7 +439,7 @@ async function saveSettings(e){
   const pub = { ...PUB, address: v('address'), phone: v('phone'),
     publicEmail: v('publicEmail'), instagram: v('instagram').replace('@', ''), hours, durations, slotStep: Number(v('slotStep')),
     horizonDays: Math.max(1, Number(v('horizonDays')) || 14), maxActive: Math.max(1, Number(v('maxActive')) || 2), minNoticeHours: Math.max(0, Number(v('minNoticeHours')) || 0), requireApproval: on('requireApproval') };
-  const priv = { ...PRIV, notifyEmail: v('notifyEmail'), reminderConfirm: on('reminderConfirm'), reminderSubject: v('reminderSubject') || DEFAULT_PRIVATE.reminderSubject, reminderBody: f.elements.reminderBody.value.trim() || DEFAULT_PRIVATE.reminderBody };
+  const priv = { ...PRIV, notifyEmail: v('notifyEmail'), reminderConfirm: on('reminderConfirm'), reminderMode: v('reminderMode'), reminderHour: Number(v('reminderHour')), reminderHours: Number(v('reminderHours')), reminderSubject: v('reminderSubject') || DEFAULT_PRIVATE.reminderSubject, reminderBody: f.elements.reminderBody.value.trim() || DEFAULT_PRIVATE.reminderBody };
   try { await Promise.all([setDoc(doc(db, 'settings', 'public'), pub), setDoc(doc(db, 'settings', 'private'), priv)]); PUB = pub; PRIV = priv; toast('Beállítások elmentve.'); }
   catch (x) { console.error(x); toast('Nem sikerült menteni.'); }
 }
@@ -720,6 +727,7 @@ document.addEventListener('change', async e => {
   if (t.id === 'heroup' && t.files[0]) uploadHero(t.files[0]);
   if (t.dataset.cap) { try { await updateDoc(doc(db, 'gallery', t.dataset.cap), { caption: t.value.trim() }); const g = gal.find(x => x.id === t.dataset.cap); if (g) g.caption = t.value.trim(); toast('Felirat mentve.'); } catch (x) { console.error(x); toast('Nem sikerült menteni.'); } }
   if (t.dataset.stkset) setStock(t.dataset.stkset, t.value, 0);
+  if (t.name === 'reminderMode') { $('rmHour').hidden = t.value !== 'prevDay'; $('rmHours').hidden = t.value !== 'hoursBefore'; }
   if (t.id === 'galon') { const pub = { ...PUB, galleryEnabled: t.checked };
     try { await setDoc(doc(db, 'settings', 'public'), pub); PUB = pub; toast(t.checked ? 'A Munkáim most már látható.' : 'A Munkáim elrejtve.'); } catch (x) { console.error(x); t.checked = !t.checked; toast('Nem sikerült menteni.'); } }
   if (t.id === 'shopon') { const pub = { ...PUB, shopEnabled: t.checked };
