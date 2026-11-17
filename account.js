@@ -2,7 +2,7 @@
 // állapottal, lemondás, kilépés. Ha itt változik valami, 'bendi:changed' eseményt küld, hogy az oldal is frissüljön.
 import { auth, db, onAuthStateChanged, signOut, doc, collection, query, where, getDocs, writeBatch,
   today, addDays, parse, fmtLong, WEEKDAYS, esc, bLabel, STATUS, toast, authError, ping, fmtFt,
-  authFormHTML, submitAuth, loadProfile, resetPassword } from './common.js?v=9';
+  authFormHTML, submitAuth, loadProfile, resetPassword, stockMove } from './common.js?v=10';
 
 const ORDER = { new: ['Beérkezett', 'warn'], ready: ['Átvehető', 'ok'], done: ['Átvéve', 'muted'], cancelled: ['Lemondva', 'muted'] };
 const orderNo = id => '#' + String(id).slice(0, 6).toUpperCase();
@@ -80,7 +80,7 @@ export function mountAccount(host, { home = 'index.html' } = {}){
   }
   async function cancelOrder(id){
     if (!confirm(`Lemondod a(z) ${orderNo(id)} rendelést?`)) return;
-    try { const batch = writeBatch(db); batch.update(doc(db, 'orders', id), { status: 'cancelled', cancelledBy: 'guest' }); await batch.commit(); ping(); toast('Lemondtad a rendelést.'); changed(); await refresh(); }
+    try { const batch = writeBatch(db), o = data?.orders?.find(x => x.id === id); batch.update(doc(db, 'orders', id), { status: 'cancelled', cancelledBy: 'guest' }); if (o) await stockMove(batch, o.items, 1, id); await batch.commit(); ping(); toast('Lemondtad a rendelést.'); changed(); await refresh(); }
     catch (e) { console.error(e); toast('Nem sikerült lemondani. Hívd fel Bendit.'); }
   }
 

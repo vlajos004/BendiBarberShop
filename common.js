@@ -1,14 +1,14 @@
 import { firebaseConfig, PING_URL } from './config.js?v=8';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, serverTimestamp, increment } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 auth.languageCode = 'hu';
 export const db = getFirestore(app);
 export { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updateProfile,
-  doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, serverTimestamp };
+  doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, serverTimestamp, increment };
 
 /* ---------- alapbeállítások (helykitöltők – Bendi az admin felületen átírja) ---------- */
 export const DEFAULT_PUBLIC = {
@@ -84,6 +84,16 @@ export const STATUS = {
 export const CONFIRM = { yes: ['Visszaigazolta', 'ok'], no: ['Lemondta (linkkel)', 'bad'] };
 
 // Szól az e-mail-szkriptnek, hogy most fusson le (a válasz nem érdekes, ezért no-cors).
+// Készlet: rendeléskor levonja (sign -1), lemondáskor visszaadja (sign +1) a batch-ben; csak a követett készletű termékeknél.
+// A levonás az adatbázisban történik (increment), így két egyidejű rendelés sem viheti mínuszba (a szabály tiltja).
+export async function stockMove(batch, items, sign, orderId){
+  for (const i of items) {
+    const s = await getDoc(doc(db, 'products', i.pid)), st = s.exists() ? s.data().stock : null;
+    if (typeof st !== 'number') continue;
+    if (sign < 0 && st < i.qty) throw { code: 'stock', name: i.name, left: st };
+    batch.update(doc(db, 'products', i.pid), { stock: increment(sign * i.qty), lastOrder: orderId });
+  }
+}
 export function ping(){ if (PING_URL) fetch(PING_URL, { mode: 'no-cors' }).catch(() => {}); }
 
 export function toast(msg){
