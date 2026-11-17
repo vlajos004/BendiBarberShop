@@ -35,7 +35,7 @@
     <div class="wrap">
       <div>
         <h1><span class="w" style="--i:0">Foglalj</span> <span class="w" style="--i:1">időpontot</span> <span class="w" style="--i:2">Bendihez.</span></h1>
-        <p class="lead">Válaszd ki, mennyi időre jössz, aztán a napot és az órát. Előző nap délután e-mailben emlékeztetünk.</p>
+        <p class="lead">Válaszd ki, mennyi időre jössz, aztán a napot és az órát. <span id="remTxt"></span></p>
         <div class="ctas">
           <a class="btn btn-red" href="#foglalas">Időpontot foglalok <span class="arrow" aria-hidden="true">→</span></a>
           <a class="btn btn-line" href="#munkak" id="cta-munkak" hidden>Munkáim</a>
@@ -89,8 +89,8 @@
 <script type="module">
 import { auth, db, loadPublic, onAuthStateChanged, signOut, doc, getDoc, collection, query, where, getDocs, writeBatch, serverTimestamp,
   today, parse, addDays, mins, hhmm, fmtLong, fmtShort, fmtDur, esc, WEEKDAYS, randToken, slotsFor, STATUS, CONFIRM, toast, authError, bLabel, ping,
-  fmtFt, authFormHTML, submitAuth, loadProfile, resetPassword, reveal } from './common.js?v=11';
-import { mountAccount } from './account.js?v=3';
+  fmtFt, authFormHTML, submitAuth, loadProfile, resetPassword, reveal, reminderText } from './common.js?v=12';
+import { mountAccount } from './account.js?v=4';
 
 let S, user = null, profile = null, busy = [], my = [], regProfile = null, gallery = [];
 const sel = { dur: null, date: null, time: null };
@@ -168,7 +168,7 @@ function renderFlow(){
     $('flow-done').innerHTML = `<div class="done"><div class="tick" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
       <h3>${done.status === 'pending' ? 'Elküldve' : 'Időpont lefoglalva'}</h3>
       <div class="ticket"><b>${esc(fmtDur(done.dur))}</b><span>${esc(cap(fmtLong(done.date)))}, ${done.start}–${done.end}</span><span>${esc(done.name)} · ${esc(done.email)}</span></div>
-      <p>${done.status === 'pending' ? 'Bendi hamarosan jóváhagyja a foglalásodat, erről e-mailt kapsz.' : 'Az időpont a tiéd.'} Előző nap délután küldünk egy emlékeztetőt.</p>
+      <p>${done.status === 'pending' ? 'Bendi hamarosan jóváhagyja a foglalásodat.' : 'Az időpont a tiéd.'}</p>
       <button class="btn btn-line btn-sm" data-act="again">Új foglalás</button></div>`;
   } else {
     for (const [k, , sum, body, locked] of STEPS){
@@ -248,6 +248,7 @@ function renderMine(){
 const near = id => setTimeout(() => { const el = $(id), r = el.getBoundingClientRect(); if (r.top < 80 || r.top > innerHeight * .7) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 60);
 
 function renderInfo(){
+  $('remTxt').textContent = reminderText(S);
   const wd = new Date().getDay();
   $('hours').innerHTML = [1,2,3,4,5,6,0].map(d => { const h = S.hours[String(d)]; return `<tr class="${d === wd ? 'today' : ''}"><td>${WEEKDAYS[d]}${d === wd ? ' (ma)' : ''}</td><td>${h ? h[0] + '–' + h[1] : 'Zárva'}</td></tr>`; }).join('');
   const maps = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(S.address || '');

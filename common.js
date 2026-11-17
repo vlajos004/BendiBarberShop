@@ -25,6 +25,8 @@ export const DEFAULT_PUBLIC = {
   minNoticeHours: 2,
   requireApproval: true,
   shopEnabled: false,
+  // az emlékeztető időzítésének nyilvános másolata (a weboldal ebből írja ki, mikor jön az e-mail); az admin mentéskor frissíti
+  reminderMode: 'prevDay', reminderHour: 16, reminderHours: 24,
   galleryEnabled: true
 };
 export const DEFAULT_PRIVATE = {
@@ -96,6 +98,11 @@ export async function stockMove(batch, items, sign, orderId){
     if (sign < 0 && st < i.qty) throw { code: 'stock', name: i.name, left: st };
     batch.update(doc(db, 'products', i.pid), { stock: increment(sign * i.qty), lastOrder: orderId });
   }
+}
+export function reminderText(S){
+  if (S.reminderMode === 'off') return '';
+  if (S.reminderMode === 'hoursBefore') { const n = Number(S.reminderHours) || 24; return n % 24 === 0 ? `Az időpont előtt ${n / 24 === 1 ? 'egy' : n / 24} nappal e-mailben emlékeztetünk.` : `Az időpont előtt ${n} órával e-mailben emlékeztetünk.`; }
+  return `Előző nap ${Number(S.reminderHour ?? 16)} órakor e-mailben emlékeztetünk.`;
 }
 export function ping(){ if (PING_URL) fetch(PING_URL, { mode: 'no-cors' }).catch(() => {}); }
 

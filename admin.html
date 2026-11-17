@@ -113,7 +113,7 @@ pre#pv{background:var(--bg)!important;border:1px solid var(--line);color:var(--i
 import { auth, db, DEFAULT_PUBLIC, DEFAULT_PRIVATE, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail,
   doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, serverTimestamp, increment,
   today, parse, toStr, addDays, mins, hhmm, fmtLong, fmtShort, fmtDur, bLabel, esc, WEEKDAYS, randToken, STATUS, CONFIRM, toast, authError, ping,
-  compressImage, fmtFt, stockMove } from './common.js?v=11';
+  compressImage, fmtFt, stockMove } from './common.js?v=12';
 
 const $ = id => document.getElementById(id);
 let user = null, PUB = null, PRIV = null, tab = 'req', pending = [], monthB = [], monthBusy = [], blocks = [];
@@ -438,7 +438,8 @@ async function saveSettings(e){
   if (!durations.length) { toast('Legalább egy időtartamot jelölj be.'); return; }
   const pub = { ...PUB, address: v('address'), phone: v('phone'),
     publicEmail: v('publicEmail'), instagram: v('instagram').replace('@', ''), hours, durations, slotStep: Number(v('slotStep')),
-    horizonDays: Math.max(1, Number(v('horizonDays')) || 14), maxActive: Math.max(1, Number(v('maxActive')) || 2), minNoticeHours: Math.max(0, Number(v('minNoticeHours')) || 0), requireApproval: on('requireApproval') };
+    horizonDays: Math.max(1, Number(v('horizonDays')) || 14), maxActive: Math.max(1, Number(v('maxActive')) || 2), minNoticeHours: Math.max(0, Number(v('minNoticeHours')) || 0), requireApproval: on('requireApproval'),
+    reminderMode: v('reminderMode'), reminderHour: Number(v('reminderHour')), reminderHours: Number(v('reminderHours')) };  // a weboldal ebből írja ki, mikor jön az emlékeztető
   const priv = { ...PRIV, notifyEmail: v('notifyEmail'), reminderConfirm: on('reminderConfirm'), reminderMode: v('reminderMode'), reminderHour: Number(v('reminderHour')), reminderHours: Number(v('reminderHours')), reminderSubject: v('reminderSubject') || DEFAULT_PRIVATE.reminderSubject, reminderBody: f.elements.reminderBody.value.trim() || DEFAULT_PRIVATE.reminderBody };
   try { await Promise.all([setDoc(doc(db, 'settings', 'public'), pub), setDoc(doc(db, 'settings', 'private'), priv)]); PUB = pub; PRIV = priv; toast('Beállítások elmentve.'); }
   catch (x) { console.error(x); toast('Nem sikerült menteni.'); }
